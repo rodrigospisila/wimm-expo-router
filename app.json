@@ -1,26 +1,28 @@
 {
   "expo": {
-    "name": "wimm-router",
-    "slug": "wimm-router",
+    "name": "Wimm - Where is my money?",
+    "slug": "wimm-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "wimmrouter",
+    "scheme": "wimm",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2e7d32"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.wimm.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#2e7d32"
       },
+      "package": "com.wimm.app",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
