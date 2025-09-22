@@ -65,7 +65,7 @@ interface InstallmentDetails {
 
 export default function InstallmentsScreen() {
   const { getToken, signOut } = useAuth();
-  const { colors } = useTheme();
+  const colors = useTheme();
   const styles = getStyles(colors);
 
   const [installments, setInstallments] = useState<Installment[]>([]);

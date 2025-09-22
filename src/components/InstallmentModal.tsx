@@ -40,7 +40,7 @@ interface InstallmentModalProps {
 
 export default function InstallmentModal({ visible, onClose, onSuccess }: InstallmentModalProps) {
   const { getToken } = useAuth();
-  const { colors } = useTheme();
+  const colors = useTheme();
   const styles = getStyles(colors);
 
   const [formData, setFormData] = useState({
