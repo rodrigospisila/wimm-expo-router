@@ -4,11 +4,13 @@ import { User } from '../types';
 
 interface AuthContextData {
   user: User | null;
+  token: string | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
+  getToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -19,6 +21,7 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,6 +35,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (storedUser && storedToken) {
         setUser(storedUser);
+        setToken(storedToken);
       }
     } catch (error) {
       console.error('Error loading stored data:', error);
@@ -49,6 +53,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await authService.saveUser(response.user);
       
       setUser(response.user);
+      setToken(response.access_token);
     } catch (error) {
       throw error;
     } finally {
@@ -65,6 +70,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await authService.saveUser(response.user);
       
       setUser(response.user);
+      setToken(response.access_token);
     } catch (error) {
       throw error;
     } finally {
@@ -77,6 +83,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setLoading(true);
       await authService.logout();
       setUser(null);
+      setToken(null);
     } catch (error) {
       console.error('Error signing out:', error);
     } finally {
@@ -84,13 +91,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function getToken(): Promise<string | null> {
+    if (token) {
+      return token;
+    }
+    
+    // Tentar obter do storage se não estiver no estado
+    const storedToken = await authService.getStoredToken();
+    if (storedToken) {
+      setToken(storedToken);
+      return storedToken;
+    }
+    
+    return null;
+  }
+
   const value: AuthContextData = {
     user,
+    token,
     loading,
     signIn,
     signUp,
     signOut,
     isAuthenticated: !!user,
+    getToken,
   };
 
   return (

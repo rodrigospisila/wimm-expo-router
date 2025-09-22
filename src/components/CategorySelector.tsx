@@ -120,7 +120,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
   placeholder = 'Selecionar categoria',
   disabled = false,
 }) => {
-  const { token } = useAuth();
+  const { getToken, signOut } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -158,6 +158,13 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
   const loadCategories = async () => {
     try {
       setLoading(true);
+      const currentToken = await getToken();
+      if (!currentToken) {
+        Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+        await signOut();
+        return;
+      }
+
       const params = new URLSearchParams();
       params.append('hierarchical', 'true');
       
@@ -166,13 +173,18 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
       }
 
       const response = await api.get(`/categories?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${currentToken}` }
       });
       
       setCategories(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao carregar categorias:', error);
-      Alert.alert('Erro', 'Não foi possível carregar as categorias');
+      if (error.response?.status === 401) {
+        Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+        await signOut();
+      } else {
+        Alert.alert('Erro', 'Não foi possível carregar as categorias');
+      }
     } finally {
       setLoading(false);
     }

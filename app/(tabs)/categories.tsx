@@ -45,7 +45,7 @@ interface CreateCategoryData {
 }
 
 export default function CategoriesScreen() {
-  const { token } = useAuth();
+  const { getToken, signOut } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -84,6 +84,13 @@ export default function CategoriesScreen() {
   const loadCategories = async () => {
     try {
       setLoading(true);
+      const currentToken = await getToken();
+      if (!currentToken) {
+        Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+        await signOut();
+        return;
+      }
+
       const params = new URLSearchParams();
       
       if (selectedType !== 'ALL') {
@@ -95,13 +102,18 @@ export default function CategoriesScreen() {
       }
 
       const response = await api.get(`/categories?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${currentToken}` }
       });
       
       setCategories(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao carregar categorias:', error);
-      Alert.alert('Erro', 'Não foi possível carregar as categorias');
+      if (error.response?.status === 401) {
+        Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+        await signOut();
+      } else {
+        Alert.alert('Erro', 'Não foi possível carregar as categorias');
+      }
     } finally {
       setLoading(false);
     }
@@ -124,15 +136,27 @@ export default function CategoriesScreen() {
             text: 'Criar',
             onPress: async () => {
               try {
+                const currentToken = await getToken();
+                if (!currentToken) {
+                  Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+                  await signOut();
+                  return;
+                }
+
                 await api.post('/categories/default', {}, {
-                  headers: { Authorization: `Bearer ${token}` }
+                  headers: { Authorization: `Bearer ${currentToken}` }
                 });
                 
                 Alert.alert('Sucesso', 'Categorias padrão criadas com sucesso!');
                 loadCategories();
               } catch (error: any) {
-                const message = error.response?.data?.message || 'Erro ao criar categorias padrão';
-                Alert.alert('Erro', message);
+                if (error.response?.status === 401) {
+                  Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+                  await signOut();
+                } else {
+                  const message = error.response?.data?.message || 'Erro ao criar categorias padrão';
+                  Alert.alert('Erro', message);
+                }
               }
             }
           }
@@ -154,8 +178,15 @@ export default function CategoriesScreen() {
             text: 'Criar',
             onPress: async () => {
               try {
+                const currentToken = await getToken();
+                if (!currentToken) {
+                  Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+                  await signOut();
+                  return;
+                }
+
                 await api.post('/categories/default/subcategories', {}, {
-                  headers: { Authorization: `Bearer ${token}` }
+                  headers: { Authorization: `Bearer ${currentToken}` }
                 });
                 
                 Alert.alert('Sucesso', 'Subcategorias padrão criadas com sucesso!');

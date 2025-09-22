@@ -68,7 +68,7 @@ interface CreateTransactionData {
 }
 
 export default function TransactionsScreen() {
-  const { token } = useAuth();
+  const { getToken, signOut } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,24 +106,47 @@ export default function TransactionsScreen() {
 
   const loadTransactions = async () => {
     try {
+      const currentToken = await getToken();
+      if (!currentToken) {
+        Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+        await signOut();
+        return;
+      }
+
       const response = await api.get('/transactions', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${currentToken}` }
       });
       setTransactions(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao carregar transações:', error);
-      Alert.alert('Erro', 'Não foi possível carregar as transações');
+      if (error.response?.status === 401) {
+        Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+        await signOut();
+      } else {
+        Alert.alert('Erro', 'Não foi possível carregar as transações');
+      }
     }
   };
 
   const loadWallets = async () => {
     try {
+      const currentToken = await getToken();
+      if (!currentToken) {
+        Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+        await signOut();
+        return;
+      }
+
       const response = await api.get('/wallets', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${currentToken}` }
       });
       setWallets(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao carregar carteiras:', error);
+      if (error.response?.status === 401) {
+        Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+        await signOut();
+      }
     }
   };
 
@@ -164,8 +187,15 @@ export default function TransactionsScreen() {
         date: formData.date,
       };
 
+      const currentToken = await getToken();
+      if (!currentToken) {
+        Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+        await signOut();
+        return;
+      }
+
       await api.post('/transactions', transactionData, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${currentToken}` }
       });
 
       Alert.alert('Sucesso', 'Transação criada com sucesso');
@@ -174,7 +204,12 @@ export default function TransactionsScreen() {
       loadData();
     } catch (error: any) {
       console.error('Erro ao criar transação:', error);
-      Alert.alert('Erro', error.response?.data?.message || 'Não foi possível criar a transação');
+      if (error.response?.status === 401) {
+        Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+        await signOut();
+      } else {
+        Alert.alert('Erro', error.response?.data?.message || 'Não foi possível criar a transação');
+      }
     }
   };
 

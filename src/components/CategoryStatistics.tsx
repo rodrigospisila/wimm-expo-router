@@ -33,7 +33,7 @@ export const CategoryStatistics: React.FC<CategoryStatisticsProps> = ({
   selectedCategoryId,
   onCategorySelect,
 }) => {
-  const { token } = useAuth();
+  const { getToken, signOut } = useAuth();
   const [statistics, setStatistics] = useState<CategoryStatistic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,19 +47,31 @@ export const CategoryStatistics: React.FC<CategoryStatisticsProps> = ({
       setLoading(true);
       setError(null);
 
+      const currentToken = await getToken();
+      if (!currentToken) {
+        setError('Sessão expirada. Faça login novamente.');
+        await signOut();
+        return;
+      }
+
       const params = new URLSearchParams();
       if (selectedCategoryId) {
         params.append('categoryId', selectedCategoryId.toString());
       }
 
       const response = await api.get(`/categories/statistics?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${currentToken}` }
       });
 
       setStatistics(response.data);
     } catch (error: any) {
       console.error('Erro ao carregar estatísticas:', error);
-      setError('Não foi possível carregar as estatísticas');
+      if (error.response?.status === 401) {
+        setError('Sessão expirada. Faça login novamente.');
+        await signOut();
+      } else {
+        setError('Não foi possível carregar as estatísticas');
+      }
     } finally {
       setLoading(false);
     }
