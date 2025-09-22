@@ -10,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../hooks/useTheme';
 
 interface CategoryStatistic {
   categoryId: number;
@@ -33,6 +34,8 @@ export const CategoryStatistics: React.FC<CategoryStatisticsProps> = ({
   selectedCategoryId,
   onCategorySelect,
 }) => {
+  const theme = useTheme();
+  const styles = getStyles(theme);
   const { getToken, signOut } = useAuth();
   const [statistics, setStatistics] = useState<CategoryStatistic[]>([]);
   const [loading, setLoading] = useState(true);
@@ -490,3 +493,218 @@ const styles = StyleSheet.create({
 });
 
 export default CategoryStatistics;
+
+
+
+const getStyles = (theme: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: theme.background,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: theme.text,
+    opacity: 0.7,
+    marginTop: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: theme.background,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#FF3B30',
+    textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  retryButton: {
+    backgroundColor: theme.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: theme.background,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: theme.text,
+    opacity: 0.7,
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: theme.text,
+    opacity: 0.5,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  summaryContainer: {
+    padding: 16,
+    backgroundColor: theme.card,
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: theme.text,
+    marginBottom: 16,
+  },
+  summaryCards: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  summaryCard: {
+    flex: 1,
+    backgroundColor: theme.background,
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 4,
+    alignItems: 'center',
+  },
+  incomeCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#34C759',
+  },
+  expenseCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#FF3B30',
+  },
+  balanceCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: theme.primary,
+  },
+  summaryLabel: {
+    fontSize: 12,
+    color: theme.text,
+    opacity: 0.7,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  summaryAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: theme.text,
+  },
+  section: {
+    marginBottom: 16,
+  },
+  horizontalList: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+  },
+  statisticCard: {
+    backgroundColor: theme.card,
+    borderRadius: 12,
+    padding: 16,
+    marginRight: 12,
+    width: screenWidth * 0.4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  categoryIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  categoryName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.text,
+    flex: 1,
+  },
+  amount: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: theme.text,
+    marginBottom: 4,
+  },
+  transactionCount: {
+    fontSize: 12,
+    color: theme.text,
+    opacity: 0.7,
+    marginBottom: 8,
+  },
+  budgetContainer: {
+    marginTop: 8,
+  },
+  budgetBar: {
+    height: 4,
+    backgroundColor: theme.border,
+    borderRadius: 2,
+    marginBottom: 4,
+  },
+  budgetProgress: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  budgetText: {
+    fontSize: 10,
+    color: theme.text,
+    opacity: 0.7,
+  },
+  alertCard: {
+    backgroundColor: theme.card,
+    borderRadius: 8,
+    padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    borderLeftWidth: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  alertHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  alertTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.text,
+    marginLeft: 8,
+  },
+  alertCategory: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: theme.text,
+    marginBottom: 4,
+  },
+  alertDetails: {
+    fontSize: 14,
+    color: theme.text,
+    opacity: 0.7,
+  },
+});

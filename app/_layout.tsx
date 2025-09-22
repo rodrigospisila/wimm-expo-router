@@ -9,7 +9,7 @@ import { PaperProvider, MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
-import { useColorScheme } from '@/components/useColorScheme';
+import { useTheme } from '../src/hooks/useTheme';
 import { AuthProvider } from '../src/contexts/AuthContext';
 
 export {
@@ -72,14 +72,37 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const theme = useTheme();
+  const isDark = useColorScheme() === 'dark';
+
+  const navigationTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: theme.background,
+      text: theme.text,
+      primary: theme.primary,
+      card: theme.card,
+      border: theme.border,
+      notification: theme.notification,
+    },
+  };
+
+  const paperTheme = {
+    ...(isDark ? MD3DarkTheme : MD3LightTheme),
+    colors: {
+      ...(isDark ? MD3DarkTheme.colors : MD3LightTheme.colors),
+      background: theme.background,
+      primary: theme.primary,
+      text: theme.text,
+    },
+  };
 
   return (
     <SafeAreaProvider>
-      <PaperProvider theme={isDark ? darkTheme : lightTheme}>
+      <PaperProvider theme={paperTheme}>
         <AuthProvider>
-          <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+          <ThemeProvider value={navigationTheme}>
             <StatusBar style={isDark ? 'light' : 'dark'} />
             <Stack>
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />

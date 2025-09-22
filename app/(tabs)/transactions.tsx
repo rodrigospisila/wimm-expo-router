@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import api from '../../src/services/api';
 import { useAuth } from '../../src/contexts/AuthContext';
+import { useTheme } from '../../src/hooks/useTheme';
 import CategorySelector from '../../src/components/CategorySelector';
 
 interface Transaction {
@@ -68,6 +69,8 @@ interface CreateTransactionData {
 }
 
 export default function TransactionsScreen() {
+  const theme = useTheme();
+  const styles = getStyles(theme);
   const { getToken, signOut } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [wallets, setWallets] = useState<Wallet[]>([]);
@@ -801,5 +804,259 @@ const styles = StyleSheet.create({
   selectedWalletName: {
     color: '#007AFF',
     fontWeight: '500',
+  },
+});
+
+
+
+const getStyles = (theme: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 10,
+    backgroundColor: theme.background,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: theme.text,
+  },
+  addButton: {
+    padding: 5,
+  },
+  summaryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 10,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.border,
+  },
+  summaryCard: {
+    alignItems: 'center',
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: theme.text,
+    opacity: 0.7,
+  },
+  summaryAmount: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 4,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.border,
+  },
+  filterButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginHorizontal: 5,
+    backgroundColor: theme.card,
+  },
+  activeFilterButton: {
+    backgroundColor: theme.primary,
+  },
+  filterText: {
+    fontSize: 14,
+    color: theme.text,
+  },
+  activeFilterText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  listContainer: {
+    paddingBottom: 20,
+  },
+  transactionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.border,
+  },
+  transactionIcon: {
+    marginRight: 15,
+  },
+  categoryIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  transactionInfo: {
+    flex: 1,
+  },
+  transactionDescription: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: theme.text,
+  },
+  transactionCategory: {
+    fontSize: 13,
+    color: theme.text,
+    opacity: 0.6,
+    marginTop: 2,
+  },
+  transactionDate: {
+    fontSize: 12,
+    color: theme.text,
+    opacity: 0.5,
+    marginTop: 2,
+  },
+  transactionAmount: {
+    alignItems: 'flex-end',
+  },
+  amountText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  walletText: {
+    fontSize: 12,
+    color: theme.text,
+    opacity: 0.6,
+    marginTop: 2,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: theme.text,
+    marginTop: 15,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: theme.text,
+    opacity: 0.7,
+    textAlign: 'center',
+    marginTop: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.border,
+  },
+  modalCloseButton: {
+    padding: 5,
+  },
+  modalCloseText: {
+    fontSize: 16,
+    color: theme.primary,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: theme.text,
+  },
+  modalSaveButton: {
+    padding: 5,
+  },
+  modalSaveText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: theme.primary,
+  },
+  modalContent: {
+    padding: 20,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: theme.text,
+    marginBottom: 8,
+  },
+  textInput: {
+    backgroundColor: theme.card,
+    color: theme.text,
+    padding: 12,
+    borderRadius: 8,
+    fontSize: 16,
+  },
+  typeSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  typeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.border,
+    marginHorizontal: 5,
+  },
+  activeTypeButton: {
+    backgroundColor: theme.primary,
+    borderColor: theme.primary,
+  },
+  typeText: {
+    fontSize: 16,
+    marginLeft: 8,
+  },
+  activeTypeText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  walletSelector: {
+    flexDirection: 'row',
+  },
+  walletOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: theme.border,
+    marginRight: 10,
+  },
+  selectedWalletOption: {
+    backgroundColor: theme.primary,
+    borderColor: theme.primary,
+  },
+  walletIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  walletName: {
+    fontSize: 14,
+    color: theme.text,
+  },
+  selectedWalletName: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });

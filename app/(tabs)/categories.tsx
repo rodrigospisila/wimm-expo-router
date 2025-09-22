@@ -15,6 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import api from '../../src/services/api';
 import { useAuth } from '../../src/contexts/AuthContext';
+import { useTheme } from '../../src/hooks/useTheme';
 import CategoryHierarchy from '../../src/components/CategoryHierarchy';
 import CategoryStatistics from '../../src/components/CategoryStatistics';
 
@@ -45,6 +46,8 @@ interface CreateCategoryData {
 }
 
 export default function CategoriesScreen() {
+  const theme = useTheme();
+  const styles = getStyles(theme);
   const { getToken, signOut } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -825,5 +828,198 @@ const styles = StyleSheet.create({
   iconOptionSelected: {
     borderColor: '#007AFF',
     backgroundColor: '#e3f2fd',
+  },
+});
+
+
+
+const getStyles = (theme: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 10,
+    backgroundColor: theme.background,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: theme.text,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  viewButton: {
+    padding: 5,
+    marginLeft: 10,
+  },
+  activeViewButton: {
+    backgroundColor: theme.primary + '20',
+    borderRadius: 5,
+  },
+  headerButton: {
+    padding: 5,
+    marginLeft: 10,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.border,
+  },
+  filterButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginHorizontal: 5,
+    backgroundColor: theme.card,
+  },
+  filterButtonActive: {
+    backgroundColor: theme.primary,
+  },
+  filterText: {
+    fontSize: 14,
+    color: theme.text,
+  },
+  filterTextActive: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  listContainer: {
+    paddingBottom: 20,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: theme.text,
+    marginTop: 15,
+  },
+  createDefaultButton: {
+    marginTop: 20,
+    backgroundColor: theme.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  createDefaultText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.border,
+  },
+  modalCancelButton: {
+    fontSize: 16,
+    color: theme.primary,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: theme.text,
+  },
+  modalSaveButton: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: theme.primary,
+  },
+  modalContent: {
+    padding: 20,
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  formLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: theme.text,
+    marginBottom: 8,
+  },
+  formInput: {
+    backgroundColor: theme.card,
+    color: theme.text,
+    padding: 12,
+    borderRadius: 8,
+    fontSize: 16,
+  },
+  typeSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  typeButton: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.border,
+    marginHorizontal: 5,
+  },
+  typeButtonActive: {
+    backgroundColor: theme.primary,
+    borderColor: theme.primary,
+  },
+  typeText: {
+    fontSize: 16,
+    color: theme.text,
+  },
+  typeTextActive: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  colorSelector: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  colorOption: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    margin: 5,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedColor: {
+    borderColor: theme.primary,
+  },
+  iconSelector: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  iconOption: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.card,
+    margin: 5,
+  },
+  selectedIcon: {
+    backgroundColor: theme.primary,
   },
 });

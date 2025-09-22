@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../hooks/useTheme';
 
 interface Category {
   id: number;
@@ -59,6 +60,8 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
   isExpanded,
   onToggleExpand,
 }) => {
+  const theme = useTheme();
+  const styles = getStyles(theme);
   const hasSubcategories = category.subCategories && category.subCategories.length > 0;
   const indentWidth = level * 20;
 
@@ -326,3 +329,103 @@ const styles = StyleSheet.create({
 });
 
 export default CategoryHierarchy;
+
+
+
+const getStyles = (theme: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  listContainer: {
+    paddingVertical: 8,
+  },
+  nodeContainer: {
+    marginBottom: 4,
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.card,
+    borderRadius: 8,
+    marginHorizontal: 4,
+    marginVertical: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  categoryContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+  },
+  expandButton: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  categoryIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  categoryInfo: {
+    flex: 1,
+  },
+  categoryName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.text,
+    marginBottom: 4,
+  },
+  categoryMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  categoryType: {
+    fontSize: 12,
+    color: theme.text,
+    opacity: 0.7,
+    marginRight: 12,
+  },
+  transactionCount: {
+    fontSize: 12,
+    color: theme.text,
+    opacity: 0.5,
+  },
+  categoryDescription: {
+    fontSize: 12,
+    color: theme.text,
+    opacity: 0.6,
+    marginTop: 2,
+  },
+  monthlyBudget: {
+    fontSize: 12,
+    color: theme.primary,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 8,
+  },
+  actionButton: {
+    padding: 8,
+    marginLeft: 4,
+  },
+  subcategoriesContainer: {
+    marginTop: 4,
+    borderLeftWidth: 2,
+    borderLeftColor: theme.border,
+    marginLeft: 20,
+  },
+});
