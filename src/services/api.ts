@@ -11,48 +11,59 @@ const api = axios.create({
   timeout: 15000,
 });
 
-// Storage para web e mobile
+// Storage para React Native (sempre usar AsyncStorage)
 const storage = {
   async getItem(key: string): Promise<string | null> {
     try {
-      if (typeof window !== 'undefined') {
-        return localStorage.getItem(key);
-      } else {
-        return await AsyncStorage.getItem(key);
-      }
-    } catch {
+      console.log('📱 Storage: Tentando obter', key);
+      const value = await AsyncStorage.getItem(key);
+      console.log('📱 Storage: Resultado para', key, ':', value ? 'encontrado' : 'não encontrado');
+      return value;
+    } catch (error) {
+      console.error('❌ Storage: Erro ao obter', key, ':', error);
       return null;
     }
   },
 
   async setItem(key: string, value: string): Promise<void> {
     try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(key, value);
-      } else {
-        await AsyncStorage.setItem(key, value);
-      }
-    } catch {
-      // Silently fail
+      console.log('📱 Storage: Salvando', key);
+      await AsyncStorage.setItem(key, value);
+      console.log('✅ Storage: Salvo com sucesso', key);
+    } catch (error) {
+      console.error('❌ Storage: Erro ao salvar', key, ':', error);
     }
   },
 
   async removeItem(key: string): Promise<void> {
     try {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem(key);
-      } else {
-        await AsyncStorage.removeItem(key);
-      }
-    } catch {
-      // Silently fail
+      console.log('📱 Storage: Removendo', key);
+      await AsyncStorage.removeItem(key);
+      console.log('✅ Storage: Removido com sucesso', key);
+    } catch (error) {
+      console.error('❌ Storage: Erro ao remover', key, ':', error);
     }
   },
 };
 
+// Token global para o interceptor
+let globalToken: string | null = null;
+
+// Função para definir o token global
+export function setGlobalToken(token: string | null) {
+  console.log('🔑 API: Definindo token global:', token ? 'definido' : 'removido');
+  globalToken = token;
+}
+
 // Interceptor para adicionar token
 api.interceptors.request.use(async (config) => {
-  const token = await storage.getItem('access_token');
+  // Tentar usar token global primeiro, depois storage
+  let token = globalToken;
+  
+  if (!token) {
+    token = await storage.getItem('access_token');
+  }
+  
   console.log('🌐 API Request:', config.method?.toUpperCase(), config.url, token ? 'com token' : 'sem token');
   
   if (token) {
@@ -68,7 +79,8 @@ api.interceptors.response.use(
     console.log('API Error:', error.response?.status, error.response?.data);
     
     if (error.response?.status === 401) {
-      console.log('Token expirado, limpando storage...');
+      console.log('Token expirado, limpando storage e token global...');
+      globalToken = null;
       await storage.removeItem('access_token');
       await storage.removeItem('user');
     }
@@ -96,6 +108,7 @@ export const authService = {
   async saveToken(token: string): Promise<void> {
     console.log('💾 AuthService: Salvando token no storage...');
     await storage.setItem('access_token', token);
+    setGlobalToken(token);
     console.log('✅ AuthService: Token salvo com sucesso');
   },
 
@@ -114,11 +127,17 @@ export const authService = {
   async getStoredToken(): Promise<string | null> {
     const token = await storage.getItem('access_token');
     console.log('Getting stored token:', token ? 'found' : 'not found');
+    
+    if (token) {
+      setGlobalToken(token);
+    }
+    
     return token;
   },
 
   async logout(): Promise<void> {
     console.log('Fazendo logout, limpando storage...');
+    setGlobalToken(null);
     await storage.removeItem('access_token');
     await storage.removeItem('user');
     console.log('Storage limpo com sucesso');

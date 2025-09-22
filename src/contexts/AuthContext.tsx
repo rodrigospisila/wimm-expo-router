@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authService } from '../services/api';
+import { authService, setGlobalToken } from '../services/api';
 import { User } from '../types';
 
 interface AuthContextData {
@@ -40,6 +40,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         // Definir o token primeiro para que o interceptor possa usá-lo
         setToken(storedToken);
+        setGlobalToken(storedToken);
         
         try {
           const profileResponse = await authService.getProfile();
@@ -83,6 +84,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Depois atualizar o estado
       setUser(response.user);
       setToken(response.access_token);
+      setGlobalToken(response.access_token);
       console.log('🎉 AuthContext: Estado atualizado, usuário logado:', response.user.email);
     } catch (error) {
       console.error('❌ AuthContext: Erro no login:', error.response?.data || error.message);
@@ -117,12 +119,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await authService.logout();
       setUser(null);
       setToken(null);
+      setGlobalToken(null);
       console.log('✅ AuthContext: Logout realizado com sucesso');
     } catch (error) {
       console.error('❌ AuthContext: Erro no logout:', error);
       // Mesmo com erro, limpar o estado local
       setUser(null);
       setToken(null);
+      setGlobalToken(null);
       console.log('🧹 AuthContext: Estado limpo mesmo com erro');
     } finally {
       setLoading(false);
@@ -143,6 +147,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (storedToken) {
         console.log('📱 AuthContext: Token encontrado no storage, atualizando estado');
         setToken(storedToken);
+        setGlobalToken(storedToken);
         return storedToken;
       }
     } catch (error) {
