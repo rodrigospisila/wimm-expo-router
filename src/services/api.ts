@@ -109,14 +109,108 @@ export const authService = {
 };
 
 export const walletService = {
-  async getWallets(): Promise<Wallet[]> {
-    const response = await api.get('/wallets');
+  async getAll(type?: string): Promise<Wallet[]> {
+    const params = type ? { type } : {};
+    const response = await api.get('/wallets', { params });
     return response.data;
   },
 
-  async createWallet(name: string, initialBalance: number): Promise<Wallet> {
-    const response = await api.post('/wallets', { name, initialBalance });
+  async getById(id: number): Promise<Wallet> {
+    const response = await api.get(`/wallets/${id}`);
     return response.data;
+  },
+
+  async create(data: {
+    name: string;
+    type?: string;
+    initialBalance?: number;
+    description?: string;
+    color?: string;
+    icon?: string;
+  }): Promise<Wallet> {
+    const response = await api.post('/wallets', data);
+    return response.data;
+  },
+
+  async update(id: number, data: {
+    name?: string;
+    type?: string;
+    currentBalance?: number;
+    description?: string;
+    color?: string;
+    icon?: string;
+    isActive?: boolean;
+  }): Promise<Wallet> {
+    const response = await api.patch(`/wallets/${id}`, data);
+    return response.data;
+  },
+
+  async delete(id: number): Promise<void> {
+    await api.delete(`/wallets/${id}`);
+  },
+
+  async toggleActive(id: number): Promise<Wallet> {
+    const response = await api.patch(`/wallets/${id}/toggle-active`);
+    return response.data;
+  },
+
+  async getSummary(): Promise<{
+    totalBalance: number;
+    walletsCount: number;
+    walletsByType: Record<string, { count: number; balance: number }>;
+    wallets: Array<{
+      id: number;
+      name: string;
+      type: string;
+      currentBalance: number;
+      color: string;
+      icon: string;
+    }>;
+  }> {
+    const response = await api.get('/wallets/summary');
+    return response.data;
+  },
+
+  async getStatistics(): Promise<{
+    totalWallets: number;
+    activeWallets: number;
+    totalBalance: number;
+    monthlyTransactions: number;
+    averageBalance: number;
+    highestBalance: number;
+    lowestBalance: number;
+    mostUsedWallet: Wallet | null;
+  }> {
+    const response = await api.get('/wallets/statistics');
+    return response.data;
+  },
+
+  async getBalanceHistory(id: number, days: number = 30): Promise<{
+    walletId: number;
+    walletName: string;
+    period: string;
+    history: Array<{ date: string; balance: number }>;
+  }> {
+    const response = await api.get(`/wallets/${id}/balance-history`, {
+      params: { days },
+    });
+    return response.data;
+  },
+
+  async getTypes(): Promise<{
+    types: Array<{ value: string; label: string; icon: string }>;
+  }> {
+    const response = await api.get('/wallets/types');
+    return response.data;
+  },
+
+  // Métodos de compatibilidade com versão anterior
+  async getWallets(): Promise<Wallet[]> {
+    return this.getAll();
+  },
+
+  async createWallet(name: string, initialBalance: number): Promise<Wallet> {
+    return this.create({ name, initialBalance });
   },
 
   async getWalletsSummary(): Promise<{
@@ -124,17 +218,24 @@ export const walletService = {
     walletsCount: number;
     wallets: Array<{ id: number; name: string; currentBalance: number }>;
   }> {
-    const response = await api.get('/wallets/summary');
-    return response.data;
+    const summary = await this.getSummary();
+    return {
+      totalBalance: summary.totalBalance,
+      walletsCount: summary.walletsCount,
+      wallets: summary.wallets.map(w => ({
+        id: w.id,
+        name: w.name,
+        currentBalance: w.currentBalance,
+      })),
+    };
   },
 
   async updateWallet(id: number, data: { name?: string; currentBalance?: number }): Promise<Wallet> {
-    const response = await api.patch(`/wallets/${id}`, data);
-    return response.data;
+    return this.update(id, data);
   },
 
   async deleteWallet(id: number): Promise<void> {
-    await api.delete(`/wallets/${id}`);
+    return this.delete(id);
   },
 };
 
