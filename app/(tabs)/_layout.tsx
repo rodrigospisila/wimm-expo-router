@@ -47,6 +47,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="categories"
+        options={{
+          title: 'Categorias',
+          tabBarIcon: ({ color }) => <TabBarIcon name="category" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Perfil',
