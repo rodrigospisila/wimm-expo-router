@@ -61,10 +61,14 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    console.log('API Error:', error.response?.status, error.response?.data);
+    
     if (error.response?.status === 401) {
+      console.log('Token expirado, limpando storage...');
       await storage.removeItem('access_token');
       await storage.removeItem('user');
     }
+    
     return Promise.reject(error);
   }
 );
@@ -95,16 +99,21 @@ export const authService = {
 
   async getStoredUser(): Promise<User | null> {
     const userStr = await storage.getItem('user');
+    console.log('Getting stored user:', userStr ? 'found' : 'not found');
     return userStr ? JSON.parse(userStr) : null;
   },
 
   async getStoredToken(): Promise<string | null> {
-    return await storage.getItem('access_token');
+    const token = await storage.getItem('access_token');
+    console.log('Getting stored token:', token ? 'found' : 'not found');
+    return token;
   },
 
   async logout(): Promise<void> {
+    console.log('Fazendo logout, limpando storage...');
     await storage.removeItem('access_token');
     await storage.removeItem('user');
+    console.log('Storage limpo com sucesso');
   },
 };
 

@@ -30,15 +30,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   async function loadStoredData() {
     try {
-      const storedUser = await authService.getStoredUser();
       const storedToken = await authService.getStoredToken();
-
-      if (storedUser && storedToken) {
-        setUser(storedUser);
-        setToken(storedToken);
+      
+      if (storedToken) {
+        // Verificar se o token ainda é válido fazendo uma requisição ao backend
+        try {
+          const profileResponse = await authService.getProfile();
+          setUser(profileResponse.user);
+          setToken(storedToken);
+        } catch (error) {
+          // Token inválido ou expirado, limpar dados
+          console.log('Token inválido, fazendo logout...');
+          await authService.logout();
+          setUser(null);
+          setToken(null);
+        }
+      } else {
+        // Não há token armazenado
+        setUser(null);
+        setToken(null);
       }
     } catch (error) {
       console.error('Error loading stored data:', error);
+      // Em caso de erro, limpar dados
+      await authService.logout();
+      setUser(null);
+      setToken(null);
     } finally {
       setLoading(false);
     }
@@ -86,6 +103,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setToken(null);
     } catch (error) {
       console.error('Error signing out:', error);
+      // Mesmo com erro, limpar o estado local
+      setUser(null);
+      setToken(null);
     } finally {
       setLoading(false);
     }
@@ -97,10 +117,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
     
     // Tentar obter do storage se não estiver no estado
-    const storedToken = await authService.getStoredToken();
-    if (storedToken) {
-      setToken(storedToken);
-      return storedToken;
+    try {
+      const storedToken = await authService.getStoredToken();
+      if (storedToken) {
+        // Verificar se o token ainda é válido
+        try {
+          await authService.getProfile();
+          setToken(storedToken);
+          return storedToken;
+        } catch (error) {
+          // Token inválido, fazer logout
+          console.log('Token expirado durante getToken, fazendo logout...');
+          await signOut();
+          return null;
+        }
+      }
+    } catch (error) {
+      console.error('Error getting token:', error);
     }
     
     return null;
