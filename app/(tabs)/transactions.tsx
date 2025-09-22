@@ -16,6 +16,7 @@ import api from '../../src/services/api';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useTheme } from '../../src/hooks/useTheme';
 import CategorySelector from '../../src/components/CategorySelector';
+import InstallmentModal from '../../src/components/InstallmentModal';
 
 interface Transaction {
   id: number;
@@ -77,6 +78,7 @@ export default function TransactionsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showInstallmentModal, setShowInstallmentModal] = useState(false);
   const [filterType, setFilterType] = useState<'ALL' | 'INCOME' | 'EXPENSE'>('ALL');
 
   // Form state
@@ -344,12 +346,21 @@ export default function TransactionsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Transações</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => setShowModal(true)}
-        >
-          <Ionicons name="add" size={24} color="#007AFF" />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={styles.installmentButton}
+            onPress={() => setShowInstallmentModal(true)}
+          >
+            <Ionicons name="card-outline" size={20} color="#007AFF" />
+            <Text style={styles.installmentButtonText}>Parcelas</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => setShowModal(true)}
+          >
+            <Ionicons name="add" size={24} color="#007AFF" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Summary */}
@@ -543,6 +554,16 @@ export default function TransactionsScreen() {
           </ScrollView>
         </View>
       </Modal>
+
+      {/* Modal de Parcelas */}
+      <InstallmentModal
+        visible={showInstallmentModal}
+        onClose={() => setShowInstallmentModal(false)}
+        onSuccess={() => {
+          loadTransactions();
+          setShowInstallmentModal(false);
+        }}
+      />
     </View>
   );
 }
@@ -564,6 +585,25 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  installmentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#f0f8ff',
+    gap: 4,
+  },
+  installmentButtonText: {
+    fontSize: 12,
+    color: '#007AFF',
+    fontWeight: '500',
   },
   addButton: {
     padding: 8,
