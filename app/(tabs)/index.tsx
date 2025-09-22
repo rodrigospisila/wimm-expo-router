@@ -20,8 +20,10 @@ export default function DashboardScreen() {
   const [snackbarMessage, setSnackbarMessage] = useState('');
 
   useEffect(() => {
-    loadSummary();
-  }, []);
+    if (user) {
+      loadSummary();
+    }
+  }, [user]);
 
   async function loadSummary() {
     try {
@@ -141,7 +143,7 @@ export default function DashboardScreen() {
       </ScrollView>
 
       <FAB
-        icon="add"
+        icon="plus"
         style={styles.fab}
         onPress={() => showSnackbar('Adicionar transação em breve!')}
       />
