@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { api } from '../services/api';
+import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
 interface CategoryStatistic {

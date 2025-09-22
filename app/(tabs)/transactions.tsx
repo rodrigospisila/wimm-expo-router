@@ -12,7 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { api } from '../../src/services/api';
+import api from '../../src/services/api';
 import { useAuth } from '../../src/contexts/AuthContext';
 import CategorySelector from '../../src/components/CategorySelector';
 
