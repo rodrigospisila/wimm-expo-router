@@ -32,7 +32,18 @@ export default function DashboardScreen() {
       setSummary(data);
     } catch (error: any) {
       console.error('Error loading summary:', error);
-      showSnackbar('Erro ao carregar resumo');
+      
+      // Se for erro 401, não mostrar snackbar pois o AuthContext já vai tratar
+      if (error.response?.status !== 401) {
+        showSnackbar('Erro ao carregar resumo. Verifique sua conexão.');
+      }
+      
+      // Definir um resumo vazio para evitar tela em branco
+      setSummary({
+        totalBalance: 0,
+        walletsCount: 0,
+        wallets: []
+      });
     } finally {
       setLoading(false);
     }
