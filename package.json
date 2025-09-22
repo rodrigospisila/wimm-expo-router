@@ -6,7 +6,10 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "clear-cache": "node clear-cache.js",
+    "web-clean": "npm run clear-cache && expo start --web --clear",
+    "start-clean": "npm run clear-cache && expo start --clear"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
