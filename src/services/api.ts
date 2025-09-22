@@ -53,6 +53,8 @@ const storage = {
 // Interceptor para adicionar token
 api.interceptors.request.use(async (config) => {
   const token = await storage.getItem('access_token');
+  console.log('🌐 API Request:', config.method?.toUpperCase(), config.url, token ? 'com token' : 'sem token');
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -92,11 +94,15 @@ export const authService = {
   },
 
   async saveToken(token: string): Promise<void> {
+    console.log('💾 AuthService: Salvando token no storage...');
     await storage.setItem('access_token', token);
+    console.log('✅ AuthService: Token salvo com sucesso');
   },
 
   async saveUser(user: User): Promise<void> {
+    console.log('💾 AuthService: Salvando usuário no storage:', user.email);
     await storage.setItem('user', JSON.stringify(user));
+    console.log('✅ AuthService: Usuário salvo com sucesso');
   },
 
   async getStoredUser(): Promise<User | null> {
