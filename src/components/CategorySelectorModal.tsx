@@ -71,10 +71,12 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   const [expanded, setExpanded] = useState(false);
 
   const handlePress = () => {
+    console.log('🔘 CategoryItem: Categoria selecionada:', category.name);
     onSelect(category);
   };
 
   const toggleExpanded = () => {
+    console.log('🔄 CategoryItem: Toggle expanded para:', category.name);
     setExpanded(!expanded);
   };
 
@@ -86,6 +88,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
         <TouchableOpacity
           style={styles.categoryContent}
           onPress={handlePress}
+          activeOpacity={0.7}
         >
           <View style={[styles.categoryIcon, { backgroundColor: category.color }]}>
             <Ionicons name={getValidIconName(category.icon)} size={16} color="white" />
@@ -102,6 +105,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
           <TouchableOpacity
             style={styles.expandButton}
             onPress={toggleExpanded}
+            activeOpacity={0.7}
           >
             <Ionicons
               name={expanded ? 'chevron-down' : 'chevron-forward'}
@@ -140,16 +144,20 @@ const CategorySelectorModal: React.FC<CategorySelectorModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
 
+  // Log detalhado para monitorar mudanças de visibilidade
   useEffect(() => {
     console.log('🔄 CategorySelectorModal: useEffect disparado');
     console.log('👁️ CategorySelectorModal: visible:', visible);
     console.log('📊 CategorySelectorModal: type:', type);
+    console.log('📊 CategorySelectorModal: Timestamp:', new Date().toISOString());
     
     if (visible) {
       console.log('✅ CategorySelectorModal: Modal visível, carregando categorias...');
       loadCategories();
     } else {
-      console.log('❌ CategorySelectorModal: Modal não visível, não carregando');
+      console.log('❌ CategorySelectorModal: Modal não visível');
+      // Reset do texto de busca quando o modal é fechado
+      setSearchText('');
     }
   }, [visible, type]);
 
@@ -181,7 +189,7 @@ const CategorySelectorModal: React.FC<CategorySelectorModalProps> = ({
       });
 
       console.log('✅ CategorySelectorModal: Resposta recebida:', response.data.length, 'categorias');
-      console.log('📋 CategorySelectorModal: Categorias:', response.data);
+      console.log('📋 CategorySelectorModal: Categorias:', response.data.map((cat: Category) => ({ id: cat.id, name: cat.name, type: cat.type })));
       
       setCategories(response.data);
     } catch (error: any) {
@@ -205,7 +213,14 @@ const CategorySelectorModal: React.FC<CategorySelectorModalProps> = ({
   };
 
   const handleCategorySelect = (category: Category) => {
+    console.log('✅ CategorySelectorModal: handleCategorySelect chamado para:', category.name);
     onSelect(category);
+    onClose();
+    console.log('✅ CategorySelectorModal: Modal fechado após seleção');
+  };
+
+  const handleClose = () => {
+    console.log('🔘 CategorySelectorModal: handleClose chamado');
     onClose();
   };
 
@@ -218,17 +233,24 @@ const CategorySelectorModal: React.FC<CategorySelectorModalProps> = ({
 
   const styles = getStyles(colors);
 
+  console.log('🎨 CategorySelectorModal: Renderizando modal');
+  console.log('👁️ CategorySelectorModal: visible no render:', visible);
+  console.log('📊 CategorySelectorModal: categories.length:', categories.length);
+  console.log('📊 CategorySelectorModal: filteredCategories.length:', filteredCategories.length);
+  console.log('📊 CategorySelectorModal: loading:', loading);
+
   return (
     <Modal
       visible={visible}
       animationType="slide"
       presentationStyle="fullScreen"
       statusBarTranslucent={true}
+      onRequestClose={handleClose}
     >
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose}>
+          <TouchableOpacity onPress={handleClose} activeOpacity={0.7}>
             <Ionicons name="close" size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.title}>Selecionar Categoria</Text>
@@ -259,6 +281,15 @@ const CategorySelectorModal: React.FC<CategorySelectorModalProps> = ({
             <Text style={styles.emptySubtext}>
               {type === 'EXPENSE' ? 'Nenhuma categoria de despesa encontrada' : 'Nenhuma categoria de receita encontrada'}
             </Text>
+            {categories.length === 0 && !loading && (
+              <TouchableOpacity
+                style={styles.retryButton}
+                onPress={loadCategories}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.retryButtonText}>Tentar novamente</Text>
+              </TouchableOpacity>
+            )}
           </View>
         ) : (
           <FlatList
@@ -273,6 +304,7 @@ const CategorySelectorModal: React.FC<CategorySelectorModalProps> = ({
             )}
             style={styles.list}
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
           />
         )}
       </SafeAreaView>
@@ -319,6 +351,9 @@ const getStyles = (colors: any) => StyleSheet.create({
   list: {
     flex: 1,
   },
+  listContent: {
+    paddingBottom: 20,
+  },
   categoryItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -326,6 +361,7 @@ const getStyles = (colors: any) => StyleSheet.create({
     paddingRight: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    minHeight: 56, // Garantir área de toque adequada
   },
   categoryContent: {
     flex: 1,
@@ -354,7 +390,7 @@ const getStyles = (colors: any) => StyleSheet.create({
     marginTop: 2,
   },
   expandButton: {
-    padding: 4,
+    padding: 8,
   },
   loadingContainer: {
     flex: 1,
@@ -383,6 +419,18 @@ const getStyles = (colors: any) => StyleSheet.create({
     color: colors.textSecondary,
     marginTop: 8,
     textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
   },
 });
 

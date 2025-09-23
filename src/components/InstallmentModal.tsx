@@ -58,46 +58,70 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [loading, setLoading] = useState(false);
   const [showCategorySelector, setShowCategorySelector] = useState(false);
-  
-  // Log para monitorar mudanças no showCategorySelector
-  useEffect(() => {
-    console.log('📊 InstallmentModal: showCategorySelector mudou para:', showCategorySelector);
-  }, [showCategorySelector]);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
 
+  // Log detalhado para monitorar mudanças no showCategorySelector
   useEffect(() => {
+    console.log('🔄 InstallmentModal: showCategorySelector mudou para:', showCategorySelector);
+    console.log('📊 InstallmentModal: Timestamp:', new Date().toISOString());
+    console.log('📊 InstallmentModal: Stack trace:', new Error().stack);
+  }, [showCategorySelector]);
+
+  // Log para monitorar quando o modal principal fica visível
+  useEffect(() => {
+    console.log('🔄 InstallmentModal: Modal principal visible mudou para:', visible);
     if (visible) {
+      console.log('✅ InstallmentModal: Modal principal aberto, carregando dados...');
       loadCategories();
       loadWallets();
+    } else {
+      console.log('❌ InstallmentModal: Modal principal fechado');
+      // Reset do estado quando o modal é fechado
+      setShowCategorySelector(false);
     }
   }, [visible]);
 
   const loadCategories = async () => {
     try {
+      console.log('🔄 InstallmentModal: Iniciando carregamento de categorias...');
       const token = getToken();
-      if (!token) return;
+      if (!token) {
+        console.log('❌ InstallmentModal: Token não encontrado');
+        return;
+      }
 
+      console.log('🌐 InstallmentModal: Fazendo requisição para /categories');
       const response = await api.get('/categories', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setCategories(response.data.filter((cat: Category) => cat.type === 'EXPENSE'));
+      
+      const expenseCategories = response.data.filter((cat: Category) => cat.type === 'EXPENSE');
+      console.log('✅ InstallmentModal: Categorias carregadas:', expenseCategories.length);
+      setCategories(expenseCategories);
     } catch (error) {
-      console.error('Erro ao carregar categorias:', error);
+      console.error('❌ InstallmentModal: Erro ao carregar categorias:', error);
     }
   };
 
   const loadWallets = async () => {
     try {
+      console.log('🔄 InstallmentModal: Iniciando carregamento de carteiras...');
       const token = getToken();
-      if (!token) return;
+      if (!token) {
+        console.log('❌ InstallmentModal: Token não encontrado para carteiras');
+        return;
+      }
 
+      console.log('🌐 InstallmentModal: Fazendo requisição para /wallets');
       const response = await api.get('/wallets', {
         headers: { Authorization: `Bearer ${token}` },
       });
+      
+      console.log('✅ InstallmentModal: Carteiras carregadas:', response.data.length);
       setWallets(response.data);
     } catch (error) {
-      console.error('Erro ao carregar carteiras:', error);
+      console.error('❌ InstallmentModal: Erro ao carregar carteiras:', error);
     }
   };
 
@@ -181,15 +205,19 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
     });
     setSelectedCategory(null);
     setSelectedWallet(null);
-  };
-
-  const handleCategorySelect = (category: Category) => {
-    setSelectedCategory(category);
-    setFormData(prev => ({ ...prev, categoryId: category.id }));
     setShowCategorySelector(false);
   };
 
+  const handleCategorySelect = (category: Category) => {
+    console.log('✅ InstallmentModal: Categoria selecionada:', category.name);
+    setSelectedCategory(category);
+    setFormData(prev => ({ ...prev, categoryId: category.id }));
+    setShowCategorySelector(false);
+    console.log('✅ InstallmentModal: Modal de categoria fechado após seleção');
+  };
+
   const handleWalletSelect = (wallet: Wallet) => {
+    console.log('✅ InstallmentModal: Carteira selecionada:', wallet.name);
     setSelectedWallet(wallet);
     setFormData(prev => ({ ...prev, walletId: wallet.id }));
   };
@@ -203,6 +231,34 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
       }
     }
     return '0.00';
+  };
+
+  // Função para abrir o modal de categoria com logs detalhados
+  const openCategorySelector = () => {
+    console.log('🔘 InstallmentModal: openCategorySelector chamada');
+    console.log('📊 InstallmentModal: showCategorySelector antes:', showCategorySelector);
+    console.log('📊 InstallmentModal: categories.length:', categories.length);
+    console.log('📊 InstallmentModal: visible:', visible);
+    
+    if (categories.length === 0) {
+      console.log('⚠️ InstallmentModal: Nenhuma categoria carregada, recarregando...');
+      loadCategories();
+    }
+    
+    setShowCategorySelector(true);
+    console.log('✅ InstallmentModal: setShowCategorySelector(true) executado');
+    
+    // Verificação adicional após um pequeno delay
+    setTimeout(() => {
+      console.log('🔍 InstallmentModal: Verificação após 100ms - showCategorySelector:', showCategorySelector);
+    }, 100);
+  };
+
+  // Função para fechar o modal de categoria
+  const closeCategorySelector = () => {
+    console.log('🔘 InstallmentModal: closeCategorySelector chamada');
+    setShowCategorySelector(false);
+    console.log('✅ InstallmentModal: setShowCategorySelector(false) executado');
   };
 
   return (
@@ -328,12 +384,8 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
               <Text style={styles.label}>Categoria</Text>
               <TouchableOpacity
                 style={styles.selector}
-                onPress={() => {
-                  console.log('🔘 InstallmentModal: TouchableOpacity pressionado');
-                  console.log('📊 InstallmentModal: showCategorySelector antes:', showCategorySelector);
-                  setShowCategorySelector(true);
-                  console.log('✅ InstallmentModal: setShowCategorySelector(true) chamado');
-                }}
+                onPress={openCategorySelector}
+                activeOpacity={0.7}
               >
                 {selectedCategory ? (
                   <View style={styles.selectedItem}>
@@ -395,9 +447,10 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
         </View>
       </Modal>
 
+      {/* Modal de Seleção de Categoria */}
       <CategorySelectorModal
         visible={showCategorySelector}
-        onClose={() => setShowCategorySelector(false)}
+        onClose={closeCategorySelector}
         onSelect={handleCategorySelect}
         type="EXPENSE"
       />
@@ -533,6 +586,7 @@ const getStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     backgroundColor: colors.surface,
+    minHeight: 48, // Garantir área de toque adequada
   },
   selectedItem: {
     flexDirection: 'row',
