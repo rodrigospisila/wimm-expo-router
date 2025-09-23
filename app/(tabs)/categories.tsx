@@ -405,7 +405,8 @@ export default function CategoriesScreen() {
         </View>
       )}
     </View>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -668,9 +669,6 @@ export default function CategoriesScreen() {
     </View>
   );
 }
-
-
-
 
 const getStyles = (theme: any) => StyleSheet.create({
   container: {
