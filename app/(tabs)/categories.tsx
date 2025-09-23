@@ -56,6 +56,7 @@ export default function CategoriesScreen() {
   const [selectedType, setSelectedType] = useState<'INCOME' | 'EXPENSE' | 'ALL'>('ALL');
   const [viewMode, setViewMode] = useState<'list' | 'hierarchy' | 'statistics'>('hierarchy');
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>();
+  const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
   
   // Form state
   const [formData, setFormData] = useState<CreateCategoryData>({
@@ -294,15 +295,49 @@ export default function CategoriesScreen() {
     }
   };
 
-  const renderCategory = ({ item }: { item: Category }) => (
+  const toggleCategoryExpansion = (categoryId: number) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId);
+      } else {
+        newSet.add(categoryId);
+      }
+      return newSet;
+    });
+  };
+
+  const renderCategory = ({ item }: { item: Category }) => {
+    const isExpanded = expandedCategories.has(item.id);
+    const hasSubcategories = item.subCategories && item.subCategories.length > 0;
+
+    return (
     <View style={styles.categoryCard}>
       <View style={styles.categoryHeader}>
-        <View style={styles.categoryInfo}>
+        <TouchableOpacity 
+          style={styles.categoryInfo}
+          onPress={() => hasSubcategories && toggleCategoryExpansion(item.id)}
+          activeOpacity={hasSubcategories ? 0.7 : 1}
+        >
           <View style={[styles.categoryIcon, { backgroundColor: item.color }]}>
             <Ionicons name={item.icon as any} size={24} color="white" />
           </View>
           <View style={styles.categoryDetails}>
-            <Text style={styles.categoryName}>{item.name}</Text>
+            <View style={styles.categoryNameRow}>
+              <Text style={styles.categoryName}>{item.name}</Text>
+              {hasSubcategories && (
+                <View style={styles.subcategoryIndicator}>
+                  <Text style={styles.subcategoryCount}>
+                    {item.subCategories.length} subcategoria{item.subCategories.length > 1 ? 's' : ''}
+                  </Text>
+                  <Ionicons 
+                    name={isExpanded ? 'chevron-up' : 'chevron-down'} 
+                    size={16} 
+                    color="#666" 
+                  />
+                </View>
+              )}
+            </View>
             <Text style={styles.categoryType}>
               {item.type === 'INCOME' ? 'Receita' : 'Despesa'}
             </Text>
@@ -313,7 +348,7 @@ export default function CategoriesScreen() {
               {item._count.transactions} transações
             </Text>
           </View>
-        </View>
+        </TouchableOpacity>
         <View style={styles.categoryActions}>
           <TouchableOpacity
             style={styles.addSubcategoryButton}
@@ -340,7 +375,7 @@ export default function CategoriesScreen() {
         </View>
       </View>
       
-      {viewMode === 'hierarchy' && item.subCategories && item.subCategories.length > 0 && (
+      {viewMode === 'hierarchy' && isExpanded && hasSubcategories && (
         <View style={styles.subCategoriesContainer}>
           <Text style={styles.subCategoriesTitle}>Subcategorias:</Text>
           {item.subCategories.map((subCategory) => (
@@ -348,10 +383,23 @@ export default function CategoriesScreen() {
               <View style={[styles.subCategoryIcon, { backgroundColor: subCategory.color }]}>
                 <Ionicons name={subCategory.icon as any} size={16} color="white" />
               </View>
-              <Text style={styles.subCategoryName}>{subCategory.name}</Text>
-              <Text style={styles.subCategoryCount}>
-                ({subCategory._count.transactions})
-              </Text>
+              <View style={styles.subCategoryDetails}>
+                <Text style={styles.subCategoryName}>{subCategory.name}</Text>
+                {subCategory.description && (
+                  <Text style={styles.subCategoryDescription}>{subCategory.description}</Text>
+                )}
+              </View>
+              <View style={styles.subCategoryActions}>
+                <Text style={styles.subCategoryTransactionCount}>
+                  {subCategory._count.transactions} transações
+                </Text>
+                <TouchableOpacity
+                  style={styles.deleteSubcategoryButton}
+                  onPress={() => deleteCategory(subCategory.id)}
+                >
+                  <Ionicons name="trash-outline" size={16} color="#FF5722" />
+                </TouchableOpacity>
+              </View>
             </View>
           ))}
         </View>
@@ -1122,5 +1170,42 @@ const getStyles = (theme: any) => StyleSheet.create({
     fontSize: 16,
     color: theme.text,
     flex: 1,
+  },
+  // Estilos para expansão de categorias
+  categoryNameRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  subcategoryIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  subcategoryCount: {
+    fontSize: 12,
+    color: '#666',
+    fontStyle: 'italic',
+  },
+  subCategoryDetails: {
+    flex: 1,
+    marginLeft: 8,
+  },
+  subCategoryDescription: {
+    fontSize: 12,
+    color: theme.textSecondary,
+    marginTop: 2,
+  },
+  subCategoryActions: {
+    alignItems: 'flex-end',
+  },
+  subCategoryTransactionCount: {
+    fontSize: 11,
+    color: theme.textSecondary,
+    marginBottom: 4,
+  },
+  deleteSubcategoryButton: {
+    padding: 4,
   },
 });

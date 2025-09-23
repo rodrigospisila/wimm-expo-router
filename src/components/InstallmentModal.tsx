@@ -72,10 +72,10 @@ const CategoryItem: React.FC<{
   colors: any;
   selectedCategoryId?: number;
 }> = ({ category, level, onSelect, colors, selectedCategoryId }) => {
-  const [expanded, setExpanded] = useState(false);
+  const hasSubcategories = category.subCategories && category.subCategories.length > 0;
+  const [expanded, setExpanded] = useState(level === 0 && hasSubcategories); // Expandir categorias principais por padrão
   const styles = getStyles(colors);
   const isSelected = selectedCategoryId === category.id;
-  const hasSubcategories = category.subCategories && category.subCategories.length > 0;
 
   return (
     <View>
