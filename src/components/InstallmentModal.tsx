@@ -65,29 +65,78 @@ const getValidIconName = (iconName: string): any => {
   return iconMap[iconName] || iconName;
 };
 
-const CategoryItem: React.FC<{ category: Category; level: number; onSelect: (category: Category) => void; colors: any }> = ({ category, level, onSelect, colors }) => {
+const CategoryItem: React.FC<{ 
+  category: Category; 
+  level: number; 
+  onSelect: (category: Category) => void; 
+  colors: any;
+  selectedCategoryId?: number;
+}> = ({ category, level, onSelect, colors, selectedCategoryId }) => {
   const [expanded, setExpanded] = useState(false);
   const styles = getStyles(colors);
+  const isSelected = selectedCategoryId === category.id;
+  const hasSubcategories = category.subCategories && category.subCategories.length > 0;
 
   return (
     <View>
-      <View style={[styles.categoryItem, { paddingLeft: 16 + (level * 20) }]}>
-        <TouchableOpacity style={styles.categoryContent} onPress={() => onSelect(category)} activeOpacity={0.7}>
+      <View style={[
+        styles.categoryItem, 
+        { paddingLeft: 16 + (level * 20) },
+        isSelected && styles.categoryItemSelected
+      ]}>
+        <TouchableOpacity 
+          style={styles.categoryContent} 
+          onPress={() => onSelect(category)} 
+          activeOpacity={0.7}
+        >
           <View style={[styles.categoryIcon, { backgroundColor: category.color }]}>
             <Ionicons name={getValidIconName(category.icon)} size={16} color="white" />
           </View>
-          <Text style={styles.categoryName}>{category.name}</Text>
+          <View style={styles.categoryTextContainer}>
+            <Text style={[
+              styles.categoryName,
+              level > 0 && styles.subcategoryName,
+              isSelected && styles.categoryNameSelected
+            ]}>
+              {category.name}
+            </Text>
+            {level === 0 && hasSubcategories && (
+              <Text style={styles.categorySubtext}>
+                {category.subCategories.length} subcategoria{category.subCategories.length > 1 ? 's' : ''}
+              </Text>
+            )}
+          </View>
         </TouchableOpacity>
-        {category.subCategories && category.subCategories.length > 0 && (
-          <TouchableOpacity style={styles.expandButton} onPress={() => setExpanded(!expanded)} activeOpacity={0.7}>
-            <Ionicons name={expanded ? 'chevron-down' : 'chevron-forward'} size={20} color={colors.textSecondary} />
+        {hasSubcategories && (
+          <TouchableOpacity 
+            style={styles.expandButton} 
+            onPress={() => setExpanded(!expanded)} 
+            activeOpacity={0.7}
+          >
+            <Ionicons 
+              name={expanded ? 'chevron-down' : 'chevron-forward'} 
+              size={20} 
+              color={colors.textSecondary} 
+            />
           </TouchableOpacity>
         )}
+        {isSelected && (
+          <View style={styles.selectedIndicator}>
+            <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+          </View>
+        )}
       </View>
-      {expanded && category.subCategories && (
-        <View>
+      {expanded && hasSubcategories && (
+        <View style={styles.subcategoriesContainer}>
           {category.subCategories.map((sub) => (
-            <CategoryItem key={sub.id} category={sub} level={level + 1} onSelect={onSelect} colors={colors} />
+            <CategoryItem 
+              key={sub.id} 
+              category={sub} 
+              level={level + 1} 
+              onSelect={onSelect} 
+              colors={colors}
+              selectedCategoryId={selectedCategoryId}
+            />
           ))}
         </View>
       )}
@@ -311,7 +360,15 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
       <FlatList
         data={filteredCategories}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <CategoryItem category={item} level={0} onSelect={handleCategorySelect} colors={colors} />}
+        renderItem={({ item }) => (
+          <CategoryItem 
+            category={item} 
+            level={0} 
+            onSelect={handleCategorySelect} 
+            colors={colors}
+            selectedCategoryId={selectedCategory?.id}
+          />
+        )}
         style={styles.list}
       />
     </View>
@@ -624,7 +681,14 @@ const getStyles = (colors: any) => StyleSheet.create({
   },
   categoryContent: { flex: 1, flexDirection: 'row', alignItems: 'center' },
   categoryIcon: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  categoryTextContainer: { flex: 1 },
   categoryName: { fontSize: 16, fontWeight: '500', color: colors.text },
+  subcategoryName: { fontSize: 14, fontWeight: '400', color: colors.textSecondary },
+  categoryNameSelected: { color: colors.primary, fontWeight: '600' },
+  categorySubtext: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  categoryItemSelected: { backgroundColor: colors.primaryLight },
+  selectedIndicator: { marginLeft: 8 },
+  subcategoriesContainer: { backgroundColor: colors.surface, marginLeft: 16, borderLeftWidth: 2, borderLeftColor: colors.border },
   expandButton: { padding: 8 },
   typeSelector: { flexDirection: 'row', gap: 12 },
   typeButton: {

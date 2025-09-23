@@ -261,7 +261,7 @@ export default function InstallmentsScreen() {
   };
 
   const renderDetailsModal = () => {
-    if (!selectedInstallment) return null;
+    if (!selectedInstallment || !selectedInstallment.installment) return null;
 
     const { installment, transactions, summary } = selectedInstallment;
 
