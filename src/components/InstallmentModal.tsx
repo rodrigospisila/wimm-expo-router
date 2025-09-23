@@ -215,7 +215,19 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log(`✅ ${response.data.length} carteiras carregadas`);
-      setWallets(response.data);
+      
+      // Filtrar carteiras baseado no tipo de parcela
+      let filteredWallets = response.data;
+      if (formData.installmentType === 'FIXED') {
+        // Para parcelas fixas, excluir cartões de crédito
+        filteredWallets = response.data.filter((wallet: any) => wallet.type !== 'CREDIT_CARD');
+      } else if (formData.installmentType === 'CREDIT_CARD') {
+        // Para cartão de crédito, mostrar apenas cartões de crédito
+        filteredWallets = response.data.filter((wallet: any) => wallet.type === 'CREDIT_CARD');
+      }
+      
+      setWallets(filteredWallets);
+      console.log(`📋 ${filteredWallets.length} carteiras filtradas para tipo: ${formData.installmentType}`);
     } catch (error) {
       console.error('❌ Erro ao carregar carteiras:', error);
     }
@@ -250,6 +262,11 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
 
     if (formData.installmentType === 'FIXED' && !formData.walletId) {
       Alert.alert('Erro', 'Selecione uma carteira para parcelas fixas');
+      return;
+    }
+
+    if (formData.installmentType === 'CREDIT_CARD' && !formData.walletId) {
+      Alert.alert('Erro', 'Selecione um cartão de crédito');
       return;
     }
 
@@ -403,7 +420,10 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
                   styles.typeButton,
                   formData.installmentType === 'FIXED' && styles.typeButtonActive,
                 ]}
-                onPress={() => setFormData(prev => ({ ...prev, installmentType: 'FIXED' }))}
+                onPress={() => {
+                  setFormData(prev => ({ ...prev, installmentType: 'FIXED', walletId: null }));
+                  loadWallets();
+                }}
               >
                 <Ionicons
                   name="calendar"
@@ -425,7 +445,10 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
                   styles.typeButton,
                   formData.installmentType === 'CREDIT_CARD' && styles.typeButtonActive,
                 ]}
-                onPress={() => setFormData(prev => ({ ...prev, installmentType: 'CREDIT_CARD' }))}
+                onPress={() => {
+                  setFormData(prev => ({ ...prev, installmentType: 'CREDIT_CARD', walletId: null }));
+                  loadWallets();
+                }}
               >
                 <Ionicons
                   name="card"
@@ -516,10 +539,12 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
             </TouchableOpacity>
           </View>
 
-          {/* Carteira (apenas para parcelas fixas) */}
-          {formData.installmentType === 'FIXED' && (
+          {/* Carteira/Cartão */}
+          {(formData.installmentType === 'FIXED' || formData.installmentType === 'CREDIT_CARD') && (
             <View style={styles.section}>
-              <Text style={styles.label}>Carteira</Text>
+              <Text style={styles.label}>
+                {formData.installmentType === 'CREDIT_CARD' ? 'Cartão de Crédito' : 'Carteira'}
+              </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={styles.walletSelector}>
                   {wallets.map((wallet) => (

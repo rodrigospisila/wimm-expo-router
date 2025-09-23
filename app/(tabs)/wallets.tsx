@@ -396,7 +396,7 @@ export default function WalletsScreen() {
               Tipo de Carteira
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.typeSelector}>
-              {walletTypes.slice(1, 4).map((type) => (
+              {walletTypes.slice(1).map((type) => (
                 <Chip
                   key={type.value}
                   mode={formData.type === type.value ? 'flat' : 'outlined'}
