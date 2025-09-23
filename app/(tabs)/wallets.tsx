@@ -72,6 +72,9 @@ export default function WalletsScreen() {
     description: '',
     color: '#4CAF50',
     icon: 'wallet',
+    creditLimit: '',
+    closingDay: '',
+    dueDay: '',
   });
 
   useEffect(() => {
@@ -137,6 +140,9 @@ export default function WalletsScreen() {
       description: '',
       color: '#4CAF50',
       icon: 'wallet',
+      creditLimit: '',
+      closingDay: '',
+      dueDay: '',
     });
     setModalVisible(true);
   };
@@ -150,6 +156,9 @@ export default function WalletsScreen() {
       description: wallet.description || '',
       color: wallet.color,
       icon: wallet.icon,
+      creditLimit: wallet.creditLimit?.toString() || '',
+      closingDay: wallet.closingDay?.toString() || '',
+      dueDay: wallet.dueDay?.toString() || '',
     });
     setModalVisible(true);
   };
@@ -161,7 +170,7 @@ export default function WalletsScreen() {
         return;
       }
 
-      const walletData = {
+      const walletData: any = {
         name: formData.name.trim(),
         type: formData.type,
         initialBalance: parseFloat(formData.initialBalance) || 0,
@@ -169,6 +178,26 @@ export default function WalletsScreen() {
         color: formData.color,
         icon: formData.icon,
       };
+
+      // Adicionar campos específicos do cartão de crédito
+      if (formData.type === 'CREDIT_CARD') {
+        if (!formData.creditLimit || !formData.closingDay || !formData.dueDay) {
+          Alert.alert('Erro', 'Para cartão de crédito, todos os campos são obrigatórios: limite, dia do fechamento e dia do vencimento');
+          return;
+        }
+
+        const closingDay = parseInt(formData.closingDay);
+        const dueDay = parseInt(formData.dueDay);
+
+        if (closingDay < 1 || closingDay > 31 || dueDay < 1 || dueDay > 31) {
+          Alert.alert('Erro', 'Dias devem estar entre 1 e 31');
+          return;
+        }
+
+        walletData.creditLimit = parseFloat(formData.creditLimit);
+        walletData.closingDay = closingDay;
+        walletData.dueDay = dueDay;
+      }
 
       if (editingWallet) {
         await walletService.update(editingWallet.id, {
@@ -418,6 +447,57 @@ export default function WalletsScreen() {
               keyboardType="numeric"
             />
 
+            {/* Campos específicos para Cartão de Crédito */}
+            {formData.type === 'CREDIT_CARD' && (
+              <>
+                <Text variant="labelMedium" style={[styles.sectionLabel, { marginTop: 16 }]}>
+                  Configurações do Cartão de Crédito
+                </Text>
+                
+                <TextInput
+                  label="Limite do Cartão"
+                  value={formData.creditLimit}
+                  onChangeText={(text) => setFormData({ ...formData, creditLimit: text })}
+                  style={styles.input}
+                  mode="outlined"
+                  keyboardType="numeric"
+                  placeholder="Ex: 5000.00"
+                />
+
+                <View style={styles.dateRow}>
+                  <View style={styles.dateField}>
+                    <TextInput
+                      label="Dia do Fechamento"
+                      value={formData.closingDay}
+                      onChangeText={(text) => setFormData({ ...formData, closingDay: text })}
+                      style={styles.input}
+                      mode="outlined"
+                      keyboardType="numeric"
+                      placeholder="Ex: 15"
+                      maxLength={2}
+                    />
+                  </View>
+                  <View style={styles.dateField}>
+                    <TextInput
+                      label="Dia do Vencimento"
+                      value={formData.dueDay}
+                      onChangeText={(text) => setFormData({ ...formData, dueDay: text })}
+                      style={styles.input}
+                      mode="outlined"
+                      keyboardType="numeric"
+                      placeholder="Ex: 10"
+                      maxLength={2}
+                    />
+                  </View>
+                </View>
+
+                <Text variant="bodySmall" style={styles.helpText}>
+                  • Dia do fechamento: quando a fatura é fechada
+                  • Dia do vencimento: quando a fatura vence para pagamento
+                </Text>
+              </>
+            )}
+
             <TextInput
               label="Descrição (opcional)"
               value={formData.description}
@@ -600,5 +680,19 @@ const styles = StyleSheet.create({
   modalButton: {
     flex: 1,
     marginHorizontal: 8,
+  },
+  dateRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  dateField: {
+    flex: 1,
+  },
+  helpText: {
+    color: '#666',
+    fontSize: 12,
+    marginBottom: 16,
+    lineHeight: 16,
   },
 });

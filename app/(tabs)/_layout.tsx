@@ -40,6 +40,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="launch"
+        options={{
+          title: 'Lançar',
+          tabBarIcon: ({ color }) => <TabBarIcon name="add-circle" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="transactions"
         options={{
           title: 'Transações',
