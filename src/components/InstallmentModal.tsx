@@ -1,37 +1,24 @@
+'''
 import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   Modal,
-  TextInput,
   TouchableOpacity,
-  Alert,
   StyleSheet,
   FlatList,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../hooks/useTheme';
 
-// Interfaces
+// INTERFACES SIMPLIFICADAS
 interface Category {
   id: number;
   name: string;
-  type: 'INCOME' | 'EXPENSE';
-  color: string;
-  icon: string;
-  description?: string;
-  subCategories: Category[];
-}
-
-interface Wallet {
-  id: number;
-  name: string;
-  type: string;
-  currentBalance: number;
   color: string;
   icon: string;
 }
@@ -39,251 +26,183 @@ interface Wallet {
 interface InstallmentModalProps {
   visible: boolean;
   onClose: () => void;
-  onSuccess: () => void;
 }
 
-// Componente de Item de Categoria
-const getValidIconName = (iconName: string): any => {
-  const iconMap: { [key: string]: string } = {
-    'shopping-cart': 'cart',
-    'account-balance': 'business',
-    'movie': 'film',
-    'more-horiz': 'ellipsis-horizontal',
-    'local-hospital': 'medical',
-    'directions-car': 'car',
-    'build': 'construct',
-    'school': 'school',
-    'home': 'home',
-    'restaurant': 'restaurant',
-  };
-  return iconMap[iconName] || iconName;
-};
-
-const CategoryItem: React.FC<{ category: Category; level: number; onSelect: (category: Category) => void; colors: any }> = ({ category, level, onSelect, colors }) => {
-  const [expanded, setExpanded] = useState(false);
-  const styles = getStyles(colors);
-
-  return (
-    <View>
-      <View style={[styles.categoryItem, { paddingLeft: 16 + (level * 20) }]}>
-        <TouchableOpacity style={styles.categoryContent} onPress={() => onSelect(category)} activeOpacity={0.7}>
-          <View style={[styles.categoryIcon, { backgroundColor: category.color }]}>
-            <Ionicons name={getValidIconName(category.icon)} size={16} color="white" />
-          </View>
-          <Text style={styles.categoryName}>{category.name}</Text>
-        </TouchableOpacity>
-        {category.subCategories && category.subCategories.length > 0 && (
-          <TouchableOpacity style={styles.expandButton} onPress={() => setExpanded(!expanded)} activeOpacity={0.7}>
-            <Ionicons name={expanded ? 'chevron-down' : 'chevron-forward'} size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-        )}
-      </View>
-      {expanded && category.subCategories && (
-        <View>
-          {category.subCategories.map((sub) => (
-            <CategoryItem key={sub.id} category={sub} level={level + 1} onSelect={onSelect} colors={colors} />
-          ))}
-        </View>
-      )}
-    </View>
-  );
-};
-
-// Componente Principal
-export default function InstallmentModal({ visible, onClose, onSuccess }: InstallmentModalProps) {
-  const { getToken, signOut } = useAuth();
+// COMPONENTE PRINCIPAL SIMPLIFICADO
+export default function InstallmentModal({ visible, onClose }: InstallmentModalProps) {
+  const { getToken } = useAuth();
   const colors = useTheme();
   const styles = getStyles(colors);
 
-  // Estados
-  const [formData, setFormData] = useState({ description: '', totalAmount: '', installmentCount: '', installmentType: 'FIXED' as 'FIXED' | 'CREDIT_CARD', categoryId: null as number | null, walletId: null as number | null, creditCardId: null as number | null, notes: '' });
-  const [loading, setLoading] = useState(false);
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [wallets, setWallets] = useState<Wallet[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [searchText, setSearchText] = useState('');
 
+  // EFEITO PARA CARREGAR CATEGORIAS QUANDO O MODAL ABRE
   useEffect(() => {
     if (visible) {
+      console.log('MODAL ABERTO. Carregando categorias...');
       loadCategories();
-      loadWallets();
     } else {
-      resetForm();
+      // Reseta o estado ao fechar para garantir consistência
+      setShowCategorySelector(false);
+      setSelectedCategory(null);
     }
   }, [visible]);
 
   const loadCategories = async () => {
     try {
       const token = getToken();
-      if (!token) return;
-      const response = await api.get('/categories', { params: { hierarchical: true, type: 'EXPENSE' }, headers: { Authorization: `Bearer ${token}` } });
-      setCategories(response.data);
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        Alert.alert('Sessão Expirada', 'Faça login novamente.', [{ text: 'OK', onPress: () => signOut() }]);
+      if (!token) {
+        Alert.alert('Erro', 'Token não encontrado.');
+        return;
       }
-    }
-  };
-
-  const loadWallets = async () => {
-    try {
-      const token = getToken();
-      if (!token) return;
-      const response = await api.get('/wallets', { headers: { Authorization: `Bearer ${token}` } });
-      setWallets(response.data);
+      const response = await api.get('/categories', {
+        params: { hierarchical: false, type: 'EXPENSE' },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log(`CATEGORIAS CARREGADAS: ${response.data.length}`);
+      setCategories(response.data);
     } catch (error) {
-      console.error('Erro ao carregar carteiras:', error);
+      console.error('ERRO AO CARREGAR CATEGORIAS:', error);
+      Alert.alert('Erro', 'Não foi possível carregar as categorias.');
     }
-  };
-
-  const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      const token = getToken();
-      if (!token) { Alert.alert('Erro', 'Token não encontrado'); return; }
-      const payload = { description: formData.description.trim(), totalAmount: parseFloat(formData.totalAmount), installmentCount: parseInt(formData.installmentCount), installmentType: formData.installmentType, categoryId: formData.categoryId, ...(formData.walletId && { walletId: formData.walletId }), ...(formData.creditCardId && { creditCardId: formData.creditCardId }), ...(formData.notes && { notes: formData.notes.trim() }) };
-      await api.post('/transactions/installments', payload, { headers: { Authorization: `Bearer ${token}` } });
-      Alert.alert('Sucesso', 'Parcelas criadas com sucesso!');
-      onSuccess();
-      onClose();
-    } catch (error: any) {
-      Alert.alert('Erro', error.response?.data?.message || 'Erro ao criar parcelas');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({ description: '', totalAmount: '', installmentCount: '', installmentType: 'FIXED', categoryId: null, walletId: null, creditCardId: null, notes: '' });
-    setSelectedCategory(null);
-    setShowCategorySelector(false);
-    setSearchText('');
   };
 
   const handleCategorySelect = (category: Category) => {
+    console.log(`CATEGORIA SELECIONADA: ${category.name}`);
     setSelectedCategory(category);
-    setFormData(prev => ({ ...prev, categoryId: category.id }));
-    setShowCategorySelector(false);
+    setShowCategorySelector(false); // Volta para a tela principal do modal
   };
 
-  const calculateInstallmentAmount = () => {
-    const total = parseFloat(formData.totalAmount);
-    const count = parseInt(formData.installmentCount);
-    return (total > 0 && count > 0) ? (total / count).toFixed(2) : '0.00';
-  };
-
-  const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    category.subCategories?.some(sub => sub.name.toLowerCase().includes(searchText.toLowerCase()))
-  );
-
+  // RENDERIZA A VIEW DO SELETOR DE CATEGORIA
   const renderCategorySelector = () => (
-    <SafeAreaView style={styles.selectorContainer} edges={['bottom', 'left', 'right']}>
+    <SafeAreaView style={styles.fullScreenView} edges={['bottom', 'left', 'right']}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => setShowCategorySelector(false)} style={styles.closeButton}>
+        <TouchableOpacity onPress={() => setShowCategorySelector(false)} style={styles.headerButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.title}>Selecionar Categoria</Text>
         <View style={{ width: 24 }} />
       </View>
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color={colors.textSecondary} />
-        <TextInput style={styles.searchInput} placeholder="Buscar categoria..." placeholderTextColor={colors.textSecondary} value={searchText} onChangeText={setSearchText} />
-      </View>
-      <FlatList data={filteredCategories} keyExtractor={(item) => item.id.toString()} renderItem={({ item }) => <CategoryItem category={item} level={0} onSelect={handleCategorySelect} colors={colors} />} style={styles.list} />
+      <FlatList
+        data={categories}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.categoryItem} onPress={() => handleCategorySelect(item)}>
+            <Text style={styles.categoryName}>{item.name}</Text>
+          </TouchableOpacity>
+        )}
+        ListEmptyComponent={<Text style={styles.emptyText}>Nenhuma categoria encontrada.</Text>}
+      />
     </SafeAreaView>
   );
 
-  const renderInstallmentForm = () => (
-    <KeyboardAwareScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ flexGrow: 1 }} enableOnAndroid={true} extraScrollHeight={20}>
+  // RENDERIZA O FORMULÁRIO PRINCIPAL (AGORA APENAS O BOTÃO)
+  const renderMainContent = () => (
+    <View style={styles.fullScreenView}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+        <TouchableOpacity onPress={onClose} style={styles.headerButton}>
           <Ionicons name="close" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.title}>Nova Parcela</Text>
-        <TouchableOpacity onPress={handleSubmit} disabled={loading} style={[styles.saveButton, loading && styles.saveButtonDisabled]}>
-          <Text style={styles.saveButtonText}>{loading ? 'Salvando...' : 'Salvar'}</Text>
-        </TouchableOpacity>
+        <Text style={styles.title}>Teste de Toque</Text>
+        <View style={{ width: 24 }} />
       </View>
+
       <View style={styles.content}>
-        <View style={styles.section}>
-          <Text style={styles.label}>Categoria</Text>
-          <TouchableOpacity style={styles.selector} onPress={() => setShowCategorySelector(true)} activeOpacity={0.6}>
-            {selectedCategory ? (
-              <View style={styles.selectedItem}>
-                <View style={[styles.categoryIcon, { backgroundColor: selectedCategory.color }]}>
-                  <Ionicons name={getValidIconName(selectedCategory.icon)} size={16} color="white" />
-                </View>
-                <Text style={styles.selectedText}>{selectedCategory.name}</Text>
-              </View>
-            ) : (
-              <Text style={styles.selectorPlaceholder}>Selecionar categoria</Text>
-            )}
-            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
+        <Text style={styles.label}>Clique no botão abaixo para abrir o seletor:</Text>
+        
+        {/* ESTE É O BOTÃO QUE PRECISAMOS TESTAR */}
+        <TouchableOpacity
+          style={styles.selectorButton}
+          onPress={() => {
+            console.log('--- BOTÃO DE CATEGORIA PRESSIONADO ---');
+            Alert.alert('Botão Pressionado', 'O evento de toque foi registrado com sucesso!');
+            setShowCategorySelector(true);
+          }}
+          activeOpacity={0.7}
+        >
+          {selectedCategory ? (
+            <Text style={styles.selectorText}>{selectedCategory.name}</Text>
+          ) : (
+            <Text style={styles.selectorPlaceholder}>Selecionar categoria</Text>
+          )}
+          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
+
+        <View style={styles.debugInfo}>
+            <Text>Estado Atual: {showCategorySelector ? "Seletor Visível" : "Formulário Visível"}</Text>
+            <Text>Categoria Selecionada: {selectedCategory?.name || "Nenhuma"}</Text>
         </View>
-        <View style={styles.section}>
-          <Text style={styles.label}>Descrição</Text>
-          <TextInput style={styles.input} value={formData.description} onChangeText={(text) => setFormData(prev => ({ ...prev, description: text }))} placeholder="Ex: Compra parcelada" placeholderTextColor={colors.textSecondary} />
-        </View>
-        <View style={styles.row}>
-          <View style={[styles.section, { flex: 1, marginRight: 8 }]}>
-            <Text style={styles.label}>Valor Total</Text>
-            <TextInput style={styles.input} value={formData.totalAmount} onChangeText={(text) => setFormData(prev => ({ ...prev, totalAmount: text }))} placeholder="0,00" placeholderTextColor={colors.textSecondary} keyboardType="numeric" />
-          </View>
-          <View style={[styles.section, { flex: 1, marginLeft: 8 }]}>
-            <Text style={styles.label}>Nº Parcelas</Text>
-            <TextInput style={styles.input} value={formData.installmentCount} onChangeText={(text) => setFormData(prev => ({ ...prev, installmentCount: text }))} placeholder="12" placeholderTextColor={colors.textSecondary} keyboardType="numeric" />
-          </View>
-        </View>
-        {formData.totalAmount && formData.installmentCount && (
-          <View style={styles.calculatedSection}>
-            <Text style={styles.calculatedLabel}>Valor da Parcela</Text>
-            <Text style={styles.calculatedValue}>R$ {calculateInstallmentAmount()}</Text>
-          </View>
-        )}
+
       </View>
-    </KeyboardAwareScrollView>
+    </View>
   );
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <View style={styles.container}>
-        {showCategorySelector ? renderCategorySelector() : renderInstallmentForm()}
-      </View>
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+      {/* A lógica de renderização condicional agora controla a UI inteira */}
+      {showCategorySelector ? renderCategorySelector() : renderMainContent()}
     </Modal>
   );
 }
 
+// ESTILOS
 const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border, paddingTop: 60 },
-  closeButton: { padding: 8 },
+  fullScreenView: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    paddingTop: 60, // Espaçamento para o notch do iPhone
+  },
+  headerButton: { padding: 8 },
   title: { fontSize: 18, fontWeight: '600', color: colors.text },
-  saveButton: { backgroundColor: colors.primary, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
-  saveButtonDisabled: { opacity: 0.6 },
-  saveButtonText: { color: 'white', fontWeight: '600' },
-  content: { padding: 16 },
-  section: { marginBottom: 20 },
-  label: { fontSize: 14, fontWeight: '500', color: colors.text, marginBottom: 8 },
-  input: { borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 12, fontSize: 16, color: colors.text, backgroundColor: colors.surface },
-  row: { flexDirection: 'row', alignItems: 'flex-end' },
-  calculatedSection: { backgroundColor: colors.primaryLight, padding: 12, borderRadius: 8, marginBottom: 20, alignItems: 'center' },
-  calculatedLabel: { fontSize: 12, color: colors.primary, marginBottom: 4 },
-  calculatedValue: { fontSize: 18, fontWeight: '600', color: colors.primary },
-  selector: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 16, backgroundColor: colors.surface, minHeight: 56 },
-  selectedItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  selectedText: { fontSize: 16, color: colors.text },
-  selectorPlaceholder: { fontSize: 16, color: colors.textSecondary },
-  selectorContainer: { flex: 1, backgroundColor: colors.background },
-  searchContainer: { flexDirection: 'row', alignItems: 'center', margin: 16, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: colors.surface, borderRadius: 8, borderWidth: 1, borderColor: colors.border },
-  searchInput: { flex: 1, marginLeft: 8, fontSize: 16, color: colors.text },
-  list: { flex: 1 },
-  categoryItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingRight: 16, borderBottomWidth: 1, borderBottomColor: colors.border },
-  categoryContent: { flex: 1, flexDirection: 'row', alignItems: 'center' },
-  categoryIcon: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  categoryName: { fontSize: 16, fontWeight: '500', color: colors.text },
-  expandButton: { padding: 8 },
+  content: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center', // Centraliza o conteúdo para o teste
+  },
+  label: {
+    fontSize: 16,
+    color: colors.text,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  selectorButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 2, // Borda mais grossa para visibilidade
+    borderColor: colors.primary, // Cor primária para destaque
+    borderRadius: 10,
+    padding: 20, // Padding maior
+    backgroundColor: colors.surface,
+    minHeight: 70, // Altura mínima maior
+  },
+  selectorText: { fontSize: 18, color: colors.text, fontWeight: 'bold' },
+  selectorPlaceholder: { fontSize: 18, color: colors.textSecondary },
+  debugInfo: {
+    marginTop: 30,
+    padding: 15,
+    backgroundColor: colors.surface,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  // Estilos do seletor de categoria
+  categoryItem: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  categoryName: { fontSize: 16, color: colors.text },
+  emptyText: { textAlign: 'center', marginTop: 50, color: colors.textSecondary },
 });
-
+'''
