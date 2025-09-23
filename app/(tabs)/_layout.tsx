@@ -33,14 +33,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="wallets"
+        name="wallets-v2"
         options={{
           title: 'Carteiras',
           tabBarIcon: ({ color }) => <TabBarIcon name="account-balance-wallet" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="launch"
+        name="launch-v2"
         options={{
           title: 'Lançar',
           tabBarIcon: ({ color }) => <TabBarIcon name="add-circle" color={color} />,
