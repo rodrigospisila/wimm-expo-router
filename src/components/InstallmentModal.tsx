@@ -384,8 +384,21 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
               <Text style={styles.label}>Categoria</Text>
               <TouchableOpacity
                 style={styles.selector}
-                onPress={openCategorySelector}
-                activeOpacity={0.7}
+                onPress={() => {
+                  console.log('🔘 InstallmentModal: TouchableOpacity pressionado - DIRETO');
+                  console.log('📊 InstallmentModal: showCategorySelector antes:', showCategorySelector);
+                  console.log('📊 InstallmentModal: categories.length:', categories.length);
+                  
+                  if (categories.length === 0) {
+                    console.log('⚠️ InstallmentModal: Recarregando categorias...');
+                    loadCategories();
+                  }
+                  
+                  setShowCategorySelector(true);
+                  console.log('✅ InstallmentModal: setShowCategorySelector(true) executado DIRETO');
+                }}
+                activeOpacity={0.6}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 {selectedCategory ? (
                   <View style={styles.selectedItem}>
@@ -450,7 +463,11 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
       {/* Modal de Seleção de Categoria */}
       <CategorySelectorModal
         visible={showCategorySelector}
-        onClose={closeCategorySelector}
+        onClose={() => {
+          console.log('🔘 InstallmentModal: Fechando modal de categoria - DIRETO');
+          setShowCategorySelector(false);
+          console.log('✅ InstallmentModal: setShowCategorySelector(false) executado DIRETO');
+        }}
         onSelect={handleCategorySelect}
         type="EXPENSE"
       />
@@ -584,9 +601,14 @@ const getStyles = (colors: any) => StyleSheet.create({
     borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 12,
+    paddingVertical: 16,
     backgroundColor: colors.surface,
-    minHeight: 48, // Garantir área de toque adequada
+    minHeight: 56, // Aumentar área de toque para iOS
+    elevation: 1, // Android
+    shadowColor: '#000', // iOS
+    shadowOffset: { width: 0, height: 1 }, // iOS
+    shadowOpacity: 0.1, // iOS
+    shadowRadius: 2, // iOS
   },
   selectedItem: {
     flexDirection: 'row',
