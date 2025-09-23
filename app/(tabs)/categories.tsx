@@ -220,8 +220,15 @@ export default function CategoriesScreen() {
         monthlyBudget: formData.monthlyBudget || undefined,
       };
 
+      const currentToken = await getToken();
+      if (!currentToken) {
+        Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+        await signOut();
+        return;
+      }
+
       await api.post('/categories', dataToSend, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${currentToken}` }
       });
 
       Alert.alert('Sucesso', 'Categoria criada com sucesso!');
@@ -241,8 +248,6 @@ export default function CategoriesScreen() {
       description: '',
       color: '#007AFF',
       icon: 'folder',
-      monthlyBudget: '',
-      parentCategoryId: null,
     });
   };
 
@@ -263,8 +268,15 @@ export default function CategoriesScreen() {
             style: 'destructive',
             onPress: async () => {
               try {
+                const currentToken = await getToken();
+                if (!currentToken) {
+                  Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+                  await signOut();
+                  return;
+                }
+
                 await api.delete(`/categories/${categoryId}`, {
-                  headers: { Authorization: `Bearer ${token}` }
+                  headers: { Authorization: `Bearer ${currentToken}` }
                 });
                 
                 Alert.alert('Sucesso', 'Categoria excluída com sucesso!');
@@ -310,7 +322,7 @@ export default function CategoriesScreen() {
         </TouchableOpacity>
       </View>
       
-      {hierarchicalView && item.subCategories && item.subCategories.length > 0 && (
+      {viewMode === 'hierarchy' && item.subCategories && item.subCategories.length > 0 && (
         <View style={styles.subCategoriesContainer}>
           <Text style={styles.subCategoriesTitle}>Subcategorias:</Text>
           {item.subCategories.map((subCategory) => (
