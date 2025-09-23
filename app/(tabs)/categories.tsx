@@ -314,12 +314,30 @@ export default function CategoriesScreen() {
             </Text>
           </View>
         </View>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => deleteCategory(item.id)}
-        >
-          <Ionicons name="trash-outline" size={20} color="#FF5722" />
-        </TouchableOpacity>
+        <View style={styles.categoryActions}>
+          <TouchableOpacity
+            style={styles.addSubcategoryButton}
+            onPress={() => {
+              setFormData({
+                name: '',
+                type: item.type,
+                description: '',
+                color: '#007AFF',
+                icon: 'folder',
+                parentCategoryId: item.id,
+              });
+              setShowModal(true);
+            }}
+          >
+            <Ionicons name="add" size={16} color="#007AFF" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => deleteCategory(item.id)}
+          >
+            <Ionicons name="trash-outline" size={20} color="#FF5722" />
+          </TouchableOpacity>
+        </View>
       </View>
       
       {viewMode === 'hierarchy' && item.subCategories && item.subCategories.length > 0 && (
@@ -463,7 +481,9 @@ export default function CategoriesScreen() {
             <TouchableOpacity onPress={() => setShowModal(false)}>
               <Text style={styles.modalCancelButton}>Cancelar</Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Nova Categoria</Text>
+            <Text style={styles.modalTitle}>
+              {formData.parentCategoryId ? 'Nova Subcategoria' : 'Nova Categoria'}
+            </Text>
             <TouchableOpacity onPress={handleCreateCategory}>
               <Text style={styles.modalSaveButton}>Salvar</Text>
             </TouchableOpacity>
@@ -512,6 +532,41 @@ export default function CategoriesScreen() {
                   </Text>
                 </TouchableOpacity>
               </View>
+            </View>
+
+            {/* Seletor de Categoria Pai */}
+            <View style={styles.formGroup}>
+              <Text style={styles.formLabel}>Categoria Pai (opcional)</Text>
+              <Text style={styles.formHint}>
+                Deixe em branco para criar uma categoria principal, ou selecione uma categoria para criar uma subcategoria
+              </Text>
+              <TouchableOpacity
+                style={styles.parentCategorySelector}
+                onPress={() => {
+                  // Implementar seletor de categoria pai
+                  Alert.alert(
+                    'Selecionar Categoria Pai',
+                    'Escolha uma categoria principal para criar uma subcategoria:',
+                    [
+                      { text: 'Nenhuma (Categoria Principal)', onPress: () => setFormData({ ...formData, parentCategoryId: undefined }) },
+                      ...categories
+                        .filter(cat => cat.type === formData.type && !cat.parentCategoryId) // Apenas categorias principais do mesmo tipo
+                        .map(cat => ({
+                          text: cat.name,
+                          onPress: () => setFormData({ ...formData, parentCategoryId: cat.id })
+                        }))
+                    ]
+                  );
+                }}
+              >
+                <Text style={styles.parentCategorySelectorText}>
+                  {formData.parentCategoryId 
+                    ? categories.find(cat => cat.id === formData.parentCategoryId)?.name || 'Categoria não encontrada'
+                    : 'Nenhuma (Categoria Principal)'
+                  }
+                </Text>
+                <Ionicons name="chevron-down" size={20} color="#666" />
+              </TouchableOpacity>
             </View>
 
             <View style={styles.formGroup}>
@@ -1033,5 +1088,39 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   selectedIcon: {
     backgroundColor: theme.primary,
+  },
+  // Novos estilos para subcategorias
+  categoryActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  addSubcategoryButton: {
+    padding: 8,
+    backgroundColor: theme.primary + '20',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  formHint: {
+    fontSize: 12,
+    color: theme.textSecondary,
+    marginBottom: 8,
+    fontStyle: 'italic',
+  },
+  parentCategorySelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: theme.card,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  parentCategorySelectorText: {
+    fontSize: 16,
+    color: theme.text,
+    flex: 1,
   },
 });
