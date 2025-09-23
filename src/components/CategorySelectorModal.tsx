@@ -122,21 +122,35 @@ const CategorySelectorModal: React.FC<CategorySelectorModalProps> = ({
   const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
+    console.log('🔄 CategorySelectorModal: useEffect disparado');
+    console.log('👁️ CategorySelectorModal: visible:', visible);
+    console.log('📊 CategorySelectorModal: type:', type);
+    
     if (visible) {
+      console.log('✅ CategorySelectorModal: Modal visível, carregando categorias...');
       loadCategories();
+    } else {
+      console.log('❌ CategorySelectorModal: Modal não visível, não carregando');
     }
   }, [visible, type]);
 
   const loadCategories = async () => {
     try {
+      console.log('🔄 CategorySelectorModal: Iniciando carregamento de categorias...');
+      console.log('📊 CategorySelectorModal: Tipo solicitado:', type);
+      
       setLoading(true);
       const token = await getToken();
       
+      console.log('🔑 CategorySelectorModal: Token obtido:', token ? 'encontrado' : 'não encontrado');
+      
       if (!token) {
+        console.log('❌ CategorySelectorModal: Token não encontrado');
         Alert.alert('Erro', 'Token de autenticação não encontrado');
         return;
       }
 
+      console.log('🌐 CategorySelectorModal: Fazendo requisição para /categories');
       const response = await api.get('/categories', {
         params: {
           hierarchical: true,
@@ -147,9 +161,14 @@ const CategorySelectorModal: React.FC<CategorySelectorModalProps> = ({
         },
       });
 
+      console.log('✅ CategorySelectorModal: Resposta recebida:', response.data.length, 'categorias');
+      console.log('📋 CategorySelectorModal: Categorias:', response.data);
+      
       setCategories(response.data);
     } catch (error: any) {
-      console.error('Erro ao carregar categorias:', error);
+      console.error('❌ CategorySelectorModal: Erro ao carregar categorias:', error);
+      console.log('📊 CategorySelectorModal: Status do erro:', error.response?.status);
+      console.log('📊 CategorySelectorModal: Dados do erro:', error.response?.data);
       
       if (error.response?.status === 401) {
         Alert.alert(
@@ -161,6 +180,7 @@ const CategorySelectorModal: React.FC<CategorySelectorModalProps> = ({
         Alert.alert('Erro', 'Não foi possível carregar as categorias');
       }
     } finally {
+      console.log('🏁 CategorySelectorModal: Carregamento finalizado');
       setLoading(false);
     }
   };
