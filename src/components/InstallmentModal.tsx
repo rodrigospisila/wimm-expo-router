@@ -58,6 +58,11 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [loading, setLoading] = useState(false);
   const [showCategorySelector, setShowCategorySelector] = useState(false);
+  
+  // Log para monitorar mudanças no showCategorySelector
+  useEffect(() => {
+    console.log('📊 InstallmentModal: showCategorySelector mudou para:', showCategorySelector);
+  }, [showCategorySelector]);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
 
@@ -323,7 +328,12 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
               <Text style={styles.label}>Categoria</Text>
               <TouchableOpacity
                 style={styles.selector}
-                onPress={() => setShowCategorySelector(true)}
+                onPress={() => {
+                  console.log('🔘 InstallmentModal: TouchableOpacity pressionado');
+                  console.log('📊 InstallmentModal: showCategorySelector antes:', showCategorySelector);
+                  setShowCategorySelector(true);
+                  console.log('✅ InstallmentModal: setShowCategorySelector(true) chamado');
+                }}
               >
                 {selectedCategory ? (
                   <View style={styles.selectedItem}>
