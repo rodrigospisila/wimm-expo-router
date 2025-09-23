@@ -8,11 +8,30 @@ import {
   FlatList,
   TextInput,
   Alert,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../hooks/useTheme';
+
+// Mapeamento de ícones inválidos para ícones válidos do Ionicons
+const getValidIconName = (iconName: string): any => {
+  const iconMap: { [key: string]: string } = {
+    'shopping-cart': 'cart',
+    'account-balance': 'business',
+    'movie': 'film',
+    'more-horiz': 'ellipsis-horizontal',
+    'local-hospital': 'medical',
+    'directions-car': 'car',
+    'build': 'construct',
+    'school': 'school',
+    'home': 'home',
+    'restaurant': 'restaurant',
+  };
+  
+  return iconMap[iconName] || iconName;
+};
 
 interface Category {
   id: number;
@@ -69,7 +88,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
           onPress={handlePress}
         >
           <View style={[styles.categoryIcon, { backgroundColor: category.color }]}>
-            <Ionicons name={category.icon as any} size={16} color="white" />
+            <Ionicons name={getValidIconName(category.icon)} size={16} color="white" />
           </View>
           <View style={styles.categoryInfo}>
             <Text style={styles.categoryName}>{category.name}</Text>
@@ -203,9 +222,10 @@ const CategorySelectorModal: React.FC<CategorySelectorModalProps> = ({
     <Modal
       visible={visible}
       animationType="slide"
-      presentationStyle="pageSheet"
+      presentationStyle="fullScreen"
+      statusBarTranslucent={true}
     >
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose}>
@@ -255,7 +275,7 @@ const CategorySelectorModal: React.FC<CategorySelectorModalProps> = ({
             showsVerticalScrollIndicator={false}
           />
         )}
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 };
