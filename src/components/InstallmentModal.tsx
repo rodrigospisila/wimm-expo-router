@@ -271,7 +271,7 @@ export default function InstallmentModal({ visible, onClose, onSuccess }: Instal
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="always">
         {/* Seletor de Categoria */}
         <View style={styles.section}>
           <Text style={styles.label}>Categoria</Text>
