@@ -73,7 +73,7 @@ export default function WalletsV2Screen() {
   // Formulários
   const [groupForm, setGroupForm] = useState({
     name: '',
-    type: '',
+    type: 'DIGITAL_WALLET',
     description: '',
     color: '#4CAF50',
     icon: 'wallet',
@@ -83,7 +83,7 @@ export default function WalletsV2Screen() {
   
   const [paymentMethodForm, setPaymentMethodForm] = useState({
     name: '',
-    type: '',
+    type: 'CREDIT_CARD',
     currentBalance: 0,
     creditLimit: 0,
     closingDay: 5,
@@ -92,6 +92,8 @@ export default function WalletsV2Screen() {
     isPrimary: false,
     color: '#4CAF50',
     icon: 'credit-card',
+    accountNumber: '',
+    agency: '',
   });
 
   const loadOverview = useCallback(async () => {
@@ -179,7 +181,7 @@ export default function WalletsV2Screen() {
     } else {
       setGroupForm({
         name: '',
-        type: '',
+        type: 'DIGITAL_WALLET',
         description: '',
         color: '#4CAF50',
         icon: 'wallet',
@@ -194,7 +196,7 @@ export default function WalletsV2Screen() {
   const openPaymentMethodModal = (group?: WalletGroup) => {
     setPaymentMethodForm({
       name: '',
-      type: '',
+      type: 'CREDIT_CARD',
       currentBalance: 0,
       creditLimit: 0,
       closingDay: 5,
@@ -203,6 +205,8 @@ export default function WalletsV2Screen() {
       isPrimary: false,
       color: group?.color || '#4CAF50',
       icon: 'credit-card',
+      accountNumber: '',
+      agency: '',
     });
     setShowPaymentMethodModal(true);
   };
@@ -491,6 +495,35 @@ export default function WalletsV2Screen() {
               onChangeText={(text) => setGroupForm({ ...groupForm, description: text })}
             />
 
+            {/* Seletor de Tipo de Grupo */}
+            <View style={styles.pickerContainer}>
+              <Text style={styles.pickerLabel}>Tipo de Carteira</Text>
+              <ScrollView style={styles.typeSelector} horizontal showsHorizontalScrollIndicator={false}>
+                {groupTypes.map((type: any) => (
+                  <TouchableOpacity
+                    key={type.value}
+                    style={[
+                      styles.typeOption,
+                      groupForm.type === type.value && styles.typeOptionSelected
+                    ]}
+                    onPress={() => setGroupForm({ ...groupForm, type: type.value })}
+                  >
+                    <Ionicons 
+                      name={type.icon as any} 
+                      size={20} 
+                      color={groupForm.type === type.value ? 'white' : colors.primary} 
+                    />
+                    <Text style={[
+                      styles.typeOptionText,
+                      groupForm.type === type.value && styles.typeOptionTextSelected
+                    ]}>
+                      {type.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
             <View style={styles.switchRow}>
               <Text style={styles.switchLabel}>PIX Integrado</Text>
               <Switch
@@ -517,8 +550,14 @@ export default function WalletsV2Screen() {
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButton]}
                 onPress={handleSaveGroup}
+                disabled={!groupForm.name || !groupForm.type}
               >
-                <Text style={styles.saveButtonText}>Salvar</Text>
+                <Text style={[
+                  styles.saveButtonText,
+                  (!groupForm.name || !groupForm.type) && styles.saveButtonTextDisabled
+                ]}>
+                  Salvar
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -538,6 +577,113 @@ export default function WalletsV2Screen() {
               onChangeText={(text) => setPaymentMethodForm({ ...paymentMethodForm, name: text })}
             />
 
+            {/* Seletor de Tipo */}
+            <View style={styles.pickerContainer}>
+              <Text style={styles.pickerLabel}>Tipo de Método</Text>
+              <ScrollView style={styles.typeSelector} horizontal showsHorizontalScrollIndicator={false}>
+                {paymentMethodTypes.map((type: any) => (
+                  <TouchableOpacity
+                    key={type.value}
+                    style={[
+                      styles.typeOption,
+                      paymentMethodForm.type === type.value && styles.typeOptionSelected
+                    ]}
+                    onPress={() => setPaymentMethodForm({ ...paymentMethodForm, type: type.value })}
+                  >
+                    <Ionicons 
+                      name={type.icon as any} 
+                      size={20} 
+                      color={paymentMethodForm.type === type.value ? 'white' : colors.primary} 
+                    />
+                    <Text style={[
+                      styles.typeOptionText,
+                      paymentMethodForm.type === type.value && styles.typeOptionTextSelected
+                    ]}>
+                      {type.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Campos condicionais baseados no tipo */}
+            {paymentMethodForm.type === 'CREDIT_CARD' && (
+              <>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Limite de crédito"
+                  keyboardType="numeric"
+                  value={paymentMethodForm.creditLimit.toString()}
+                  onChangeText={(text) => setPaymentMethodForm({ 
+                    ...paymentMethodForm, 
+                    creditLimit: parseFloat(text) || 0 
+                  })}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Dia de fechamento (1-28)"
+                  keyboardType="numeric"
+                  value={paymentMethodForm.closingDay.toString()}
+                  onChangeText={(text) => setPaymentMethodForm({ 
+                    ...paymentMethodForm, 
+                    closingDay: parseInt(text) || 5 
+                  })}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Dia de vencimento"
+                  keyboardType="numeric"
+                  value={paymentMethodForm.dueDay.toString()}
+                  onChangeText={(text) => setPaymentMethodForm({ 
+                    ...paymentMethodForm, 
+                    dueDay: parseInt(text) || 15 
+                  })}
+                />
+              </>
+            )}
+
+            {(paymentMethodForm.type === 'CHECKING_ACCOUNT' || paymentMethodForm.type === 'SAVINGS_ACCOUNT') && (
+              <>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Número da conta"
+                  value={paymentMethodForm.accountNumber || ''}
+                  onChangeText={(text) => setPaymentMethodForm({ 
+                    ...paymentMethodForm, 
+                    accountNumber: text 
+                  })}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Agência"
+                  value={paymentMethodForm.agency || ''}
+                  onChangeText={(text) => setPaymentMethodForm({ 
+                    ...paymentMethodForm, 
+                    agency: text 
+                  })}
+                />
+              </>
+            )}
+
+            <TextInput
+              style={styles.input}
+              placeholder="Saldo atual"
+              keyboardType="numeric"
+              value={paymentMethodForm.currentBalance.toString()}
+              onChangeText={(text) => setPaymentMethodForm({ 
+                ...paymentMethodForm, 
+                currentBalance: parseFloat(text) || 0 
+              })}
+            />
+
+            <View style={styles.switchRow}>
+              <Text style={styles.switchLabel}>Método Principal</Text>
+              <Switch
+                value={paymentMethodForm.isPrimary}
+                onValueChange={(value) => setPaymentMethodForm({ ...paymentMethodForm, isPrimary: value })}
+              />
+            </View>
+
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
@@ -548,8 +694,14 @@ export default function WalletsV2Screen() {
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButton]}
                 onPress={handleSavePaymentMethod}
+                disabled={!paymentMethodForm.name || !paymentMethodForm.type}
               >
-                <Text style={styles.saveButtonText}>Salvar</Text>
+                <Text style={[
+                  styles.saveButtonText,
+                  (!paymentMethodForm.name || !paymentMethodForm.type) && styles.saveButtonTextDisabled
+                ]}>
+                  Salvar
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -847,5 +999,45 @@ const getStyles = (theme: string, colors: any) => StyleSheet.create({
   saveButtonText: {
     color: 'white',
     fontWeight: '600',
+  },
+  saveButtonTextDisabled: {
+    color: colors.textSecondary,
+  },
+  pickerContainer: {
+    marginBottom: 16,
+  },
+  pickerLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  typeSelector: {
+    maxHeight: 80,
+  },
+  typeOption: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: 8,
+    padding: 12,
+    marginRight: 8,
+    minWidth: 80,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  typeOptionSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  typeOptionText: {
+    fontSize: 10,
+    color: colors.text,
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  typeOptionTextSelected: {
+    color: 'white',
   },
 });
