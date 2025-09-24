@@ -12,9 +12,9 @@ import {
   Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../src/hooks/useTheme';
-import { api } from '../src/services/api';
-import { useAuth } from '../src/contexts/AuthContext';
+import { useTheme } from '../../src/hooks/useTheme';
+import { api } from '../../src/services/api';
+import { useAuth } from '../../src/contexts/AuthContext';
 
 interface Category {
   id: number;
