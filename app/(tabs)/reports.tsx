@@ -14,15 +14,13 @@ import { useAuth } from '../../src/contexts/AuthContext';
 import DashboardOverview from '../../src/components/reports/DashboardOverview';
 import CategoryReport from '../../src/components/reports/CategoryReport';
 import TimeAnalysis from '../../src/components/reports/TimeAnalysis';
-import InstallmentReport from '../../src/components/reports/InstallmentReport';
 
-type ReportTab = 'dashboard' | 'categories' | 'timeline' | 'installments';
+type ReportTab = 'dashboard' | 'categories' | 'timeline';
 
 const reportTabs = [
   { id: 'dashboard', title: 'Dashboard', icon: 'analytics' },
   { id: 'categories', title: 'Categorias', icon: 'pie-chart' },
   { id: 'timeline', title: 'Temporal', icon: 'trending-up' },
-  { id: 'installments', title: 'Parcelas', icon: 'card' },
 ] as const;
 
 export default function ReportsScreen() {
@@ -56,8 +54,6 @@ export default function ReportsScreen() {
         return <CategoryReport {...commonProps} />;
       case 'timeline':
         return <TimeAnalysis {...commonProps} />;
-      case 'installments':
-        return <InstallmentReport {...commonProps} />;
       default:
         return <DashboardOverview {...commonProps} />;
     }
