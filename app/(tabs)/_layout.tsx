@@ -33,24 +33,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="wallets-v2"
+        name="wallets"
         options={{
           title: 'Carteiras',
           tabBarIcon: ({ color }) => <TabBarIcon name="account-balance-wallet" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="launch-v2"
+        name="launch"
         options={{
           title: 'Lançar',
           tabBarIcon: ({ color }) => <TabBarIcon name="add-circle" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="transactions"
-        options={{
-          title: 'Transações',
-          tabBarIcon: ({ color }) => <TabBarIcon name="receipt-long" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -58,13 +51,6 @@ export default function TabLayout() {
         options={{
           title: 'Categorias',
           tabBarIcon: ({ color }) => <TabBarIcon name="category" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="installments"
-        options={{
-          title: 'Parcelas',
-          tabBarIcon: ({ color }) => <TabBarIcon name="credit-card" color={color} />,
         }}
       />
       <Tabs.Screen

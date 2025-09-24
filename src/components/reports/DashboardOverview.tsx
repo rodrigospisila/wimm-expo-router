@@ -20,7 +20,7 @@ interface DashboardData {
   walletsCount: number;
   transactionsCount: number;
   categoriesCount: number;
-  pendingInstallments: number;
+
   topCategories: Array<{
     id: number;
     name: string;
@@ -187,11 +187,7 @@ export default function DashboardOverview({ dateRange, refreshing }: DashboardOv
             <Text style={styles.statValue}>{data.categoriesCount}</Text>
             <Text style={styles.statLabel}>Categorias</Text>
           </View>
-          <View style={styles.statItem}>
-            <Ionicons name="time" size={24} color={colors.primary} />
-            <Text style={styles.statValue}>{data.pendingInstallments}</Text>
-            <Text style={styles.statLabel}>Parcelas</Text>
-          </View>
+
         </View>
       </View>
 
