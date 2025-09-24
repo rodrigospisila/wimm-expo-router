@@ -147,7 +147,7 @@ export default function CategoriesScreen() {
                   return;
                 }
 
-                await api.post('/categories/default', {}, {
+                await api.post('/categories/create-defaults', {}, {
                   headers: { Authorization: `Bearer ${currentToken}` }
                 });
                 
@@ -161,43 +161,6 @@ export default function CategoriesScreen() {
                   const message = error.response?.data?.message || 'Erro ao criar categorias padrão';
                   Alert.alert('Erro', message);
                 }
-              }
-            }
-          }
-        ]
-      );
-    } catch (error) {
-      console.error('Erro:', error);
-    }
-  };
-
-  const createDefaultSubcategories = async () => {
-    try {
-      Alert.alert(
-        'Criar Subcategorias Padrão',
-        'Isso criará subcategorias para as categorias principais existentes. Deseja continuar?',
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          {
-            text: 'Criar',
-            onPress: async () => {
-              try {
-                const currentToken = await getToken();
-                if (!currentToken) {
-                  Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
-                  await signOut();
-                  return;
-                }
-
-                await api.post('/categories/default/subcategories', {}, {
-                  headers: { Authorization: `Bearer ${currentToken}` }
-                });
-                
-                Alert.alert('Sucesso', 'Subcategorias padrão criadas com sucesso!');
-                loadCategories();
-              } catch (error: any) {
-                const message = error.response?.data?.message || 'Erro ao criar subcategorias padrão';
-                Alert.alert('Erro', message);
               }
             }
           }
