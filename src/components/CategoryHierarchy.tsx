@@ -22,7 +22,7 @@ interface Category {
   parentCategoryId?: number;
   parentCategory?: Category;
   subCategories: Category[];
-  _count: {
+  _count?: {
     transactions: number;
   };
 }
@@ -120,7 +120,7 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
                 {category.type === 'INCOME' ? 'Receita' : 'Despesa'}
               </Text>
               <Text style={styles.transactionCount}>
-                {category._count.transactions} transações
+                {category._count?.transactions || 0} transações
               </Text>
             </View>
             {category.description && (
