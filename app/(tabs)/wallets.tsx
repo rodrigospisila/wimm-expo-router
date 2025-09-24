@@ -52,7 +52,7 @@ const walletIcons: Record<string, string> = {
 };
 
 export default function WalletsScreen() {
-  const theme = useTheme();
+  const { theme, colors } = useTheme();
   const { user } = useAuth();
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [filteredWallets, setFilteredWallets] = useState<Wallet[]>([]);

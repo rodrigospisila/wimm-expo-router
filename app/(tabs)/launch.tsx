@@ -36,8 +36,8 @@ interface Wallet {
 }
 
 export default function LaunchScreen() {
-  const theme = useTheme();
-  const styles = getStyles(theme);
+  const { theme, colors } = useTheme();
+  const styles = getStyles(theme, colors);
   const { getToken, signOut } = useAuth();
 
   // Estados principais
@@ -221,7 +221,7 @@ export default function LaunchScreen() {
         <View style={styles.modalHeader}>
           <Text style={styles.modalTitle}>Selecionar Categoria</Text>
           <TouchableOpacity onPress={() => setShowCategorySelector(false)}>
-            <Ionicons name="close" size={24} color={theme.text} />
+            <Ionicons name="close" size={24} color={colors.text} />
           </TouchableOpacity>
         </View>
 
@@ -243,7 +243,7 @@ export default function LaunchScreen() {
                 </View>
                 <Text style={styles.categoryName}>{category.name}</Text>
                 {selectedCategory?.id === category.id && (
-                  <Ionicons name="checkmark" size={20} color={theme.primary} />
+                  <Ionicons name="checkmark" size={20} color={colors.primary} />
                 )}
               </TouchableOpacity>
 
@@ -265,7 +265,7 @@ export default function LaunchScreen() {
                   </View>
                   <Text style={styles.subCategoryName}>{subCategory.name}</Text>
                   {selectedCategory?.id === subCategory.id && (
-                    <Ionicons name="checkmark" size={20} color={theme.primary} />
+                    <Ionicons name="checkmark" size={20} color={colors.primary} />
                   )}
                 </TouchableOpacity>
               ))}
@@ -288,7 +288,7 @@ export default function LaunchScreen() {
             Selecionar {paymentMethod === 'CARD' ? 'Cartão' : 'Carteira'}
           </Text>
           <TouchableOpacity onPress={() => setShowWalletSelector(false)}>
-            <Ionicons name="close" size={24} color={theme.text} />
+            <Ionicons name="close" size={24} color={colors.text} />
           </TouchableOpacity>
         </View>
 
@@ -318,7 +318,7 @@ export default function LaunchScreen() {
                 </Text>
               </View>
               {selectedWallet?.id === wallet.id && (
-                <Ionicons name="checkmark" size={20} color={theme.primary} />
+                <Ionicons name="checkmark" size={20} color={colors.primary} />
               )}
             </TouchableOpacity>
           ))}
@@ -344,7 +344,7 @@ export default function LaunchScreen() {
               <Ionicons 
                 name="arrow-up" 
                 size={20} 
-                color={transactionType === 'INCOME' ? 'white' : theme.textSecondary} 
+                color={transactionType === 'INCOME' ? 'white' : colors.textSecondary} 
               />
               <Text style={[
                 styles.toggleButtonText,
@@ -363,7 +363,7 @@ export default function LaunchScreen() {
               <Ionicons 
                 name="arrow-down" 
                 size={20} 
-                color={transactionType === 'EXPENSE' ? 'white' : theme.textSecondary} 
+                color={transactionType === 'EXPENSE' ? 'white' : colors.textSecondary} 
               />
               <Text style={[
                 styles.toggleButtonText,
@@ -389,7 +389,7 @@ export default function LaunchScreen() {
               <Ionicons 
                 name="flash" 
                 size={20} 
-                color={paymentType === 'CASH' ? 'white' : theme.textSecondary} 
+                color={paymentType === 'CASH' ? 'white' : colors.textSecondary} 
               />
               <Text style={[
                 styles.toggleButtonText,
@@ -408,7 +408,7 @@ export default function LaunchScreen() {
               <Ionicons 
                 name="card" 
                 size={20} 
-                color={paymentType === 'INSTALLMENT' ? 'white' : theme.textSecondary} 
+                color={paymentType === 'INSTALLMENT' ? 'white' : colors.textSecondary} 
               />
               <Text style={[
                 styles.toggleButtonText,
@@ -439,7 +439,7 @@ export default function LaunchScreen() {
                     method === 'CARD' ? 'card' : 'cash'
                   } 
                   size={20} 
-                  color={paymentMethod === method ? 'white' : theme.textSecondary} 
+                  color={paymentMethod === method ? 'white' : colors.textSecondary} 
                 />
                 <Text style={[
                   styles.methodButtonText,
@@ -460,7 +460,7 @@ export default function LaunchScreen() {
             value={description}
             onChangeText={setDescription}
             placeholder="Ex: Almoço no restaurante"
-            placeholderTextColor={theme.textSecondary}
+            placeholderTextColor={colors.textSecondary}
           />
         </View>
 
@@ -472,7 +472,7 @@ export default function LaunchScreen() {
             value={amount}
             onChangeText={setAmount}
             placeholder="R$ 0,00"
-            placeholderTextColor={theme.textSecondary}
+            placeholderTextColor={colors.textSecondary}
             keyboardType="numeric"
           />
         </View>
@@ -486,7 +486,7 @@ export default function LaunchScreen() {
               value={installmentCount}
               onChangeText={setInstallmentCount}
               placeholder="Ex: 12"
-              placeholderTextColor={theme.textSecondary}
+              placeholderTextColor={colors.textSecondary}
               keyboardType="numeric"
             />
             {amount && installmentCount && parseInt(installmentCount) > 1 && (
@@ -514,7 +514,7 @@ export default function LaunchScreen() {
             ) : (
               <Text style={styles.selectorPlaceholder}>Selecionar categoria</Text>
             )}
-            <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
 
@@ -539,7 +539,7 @@ export default function LaunchScreen() {
                 Selecionar {paymentMethod === 'CARD' ? 'cartão' : 'carteira'}
               </Text>
             )}
-            <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
 
@@ -551,7 +551,7 @@ export default function LaunchScreen() {
             value={notes}
             onChangeText={setNotes}
             placeholder="Observações adicionais (opcional)"
-            placeholderTextColor={theme.textSecondary}
+            placeholderTextColor={colors.textSecondary}
             multiline
             numberOfLines={3}
           />
@@ -575,10 +575,10 @@ export default function LaunchScreen() {
   );
 }
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: string, colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -590,12 +590,12 @@ const getStyles = (theme: any) => StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
     marginBottom: 12,
   },
   toggleContainer: {
     flexDirection: 'row',
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     padding: 4,
   },
@@ -610,12 +610,12 @@ const getStyles = (theme: any) => StyleSheet.create({
     gap: 8,
   },
   toggleButtonActive: {
-    backgroundColor: theme.primary,
+    backgroundColor: colors.primary,
   },
   toggleButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: theme.textSecondary,
+    color: colors.textSecondary,
   },
   toggleButtonTextActive: {
     color: 'white',
@@ -631,30 +631,30 @@ const getStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     gap: 6,
   },
   methodButtonActive: {
-    backgroundColor: theme.primary,
+    backgroundColor: colors.primary,
   },
   methodButtonText: {
     fontSize: 12,
     fontWeight: '500',
-    color: theme.textSecondary,
+    color: colors.textSecondary,
   },
   methodButtonTextActive: {
     color: 'white',
   },
   textInput: {
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: theme.text,
+    color: colors.text,
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
   },
   textArea: {
     height: 80,
@@ -662,12 +662,12 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   installmentInfo: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 8,
     textAlign: 'center',
   },
   selector: {
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -675,11 +675,11 @@ const getStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
   },
   selectorPlaceholder: {
     fontSize: 16,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
   },
   selectedItem: {
     flexDirection: 'row',
@@ -695,11 +695,11 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   selectedText: {
     fontSize: 16,
-    color: theme.text,
+    color: colors.text,
     fontWeight: '500',
   },
   saveButton: {
-    backgroundColor: theme.primary,
+    backgroundColor: colors.primary,
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: 'center',
@@ -716,7 +716,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -725,12 +725,12 @@ const getStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
   },
   modalContent: {
     flex: 1,
@@ -746,7 +746,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     gap: 12,
   },
   categoryItemSelected: {
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
   },
   categoryIcon: {
     width: 32,
@@ -759,7 +759,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '500',
-    color: theme.text,
+    color: colors.text,
   },
   subCategoryItem: {
     flexDirection: 'row',
@@ -781,7 +781,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   subCategoryName: {
     flex: 1,
     fontSize: 14,
-    color: theme.text,
+    color: colors.text,
   },
   walletItem: {
     flexDirection: 'row',
@@ -793,7 +793,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     gap: 12,
   },
   walletItemSelected: {
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
   },
   walletIcon: {
     width: 32,
@@ -808,11 +808,11 @@ const getStyles = (theme: any) => StyleSheet.create({
   walletName: {
     fontSize: 16,
     fontWeight: '500',
-    color: theme.text,
+    color: colors.text,
   },
   walletBalance: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 2,
   },
 });

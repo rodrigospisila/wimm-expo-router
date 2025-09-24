@@ -42,8 +42,8 @@ interface CategoryReportProps {
 }
 
 export default function CategoryReport({ dateRange, refreshing }: CategoryReportProps) {
-  const theme = useTheme();
-  const styles = getStyles(theme);
+  const { theme, colors } = useTheme();
+  const styles = getStyles(theme, colors);
   const { getToken, signOut } = useAuth();
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,7 +122,7 @@ export default function CategoryReport({ dateRange, refreshing }: CategoryReport
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Ionicons name="pie-chart" size={48} color={theme.textSecondary} />
+        <Ionicons name="pie-chart" size={48} color={colors.textSecondary} />
         <Text style={styles.loadingText}>Carregando relatório...</Text>
       </View>
     );
@@ -155,7 +155,7 @@ export default function CategoryReport({ dateRange, refreshing }: CategoryReport
 
       {categories.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="pie-chart-outline" size={64} color={theme.textSecondary} />
+          <Ionicons name="pie-chart-outline" size={64} color={colors.textSecondary} />
           <Text style={styles.emptyText}>Nenhuma categoria encontrada</Text>
           <Text style={styles.emptySubtext}>
             Adicione transações para ver o relatório por categorias
@@ -191,7 +191,7 @@ export default function CategoryReport({ dateRange, refreshing }: CategoryReport
                     <Ionicons
                       name={expandedCategories.has(category.id) ? 'chevron-up' : 'chevron-down'}
                       size={20}
-                      color={theme.textSecondary}
+                      color={colors.textSecondary}
                     />
                   )}
                 </View>
@@ -232,7 +232,7 @@ export default function CategoryReport({ dateRange, refreshing }: CategoryReport
   );
 }
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: string, colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
@@ -245,13 +245,13 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 16,
   },
   filterContainer: {
     flexDirection: 'row',
     marginBottom: 20,
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     padding: 4,
   },
@@ -263,12 +263,12 @@ const getStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
   },
   filterButtonActive: {
-    backgroundColor: theme.primary,
+    backgroundColor: colors.primary,
   },
   filterButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: theme.textSecondary,
+    color: colors.textSecondary,
   },
   filterButtonTextActive: {
     color: 'white',
@@ -282,13 +282,13 @@ const getStyles = (theme: any) => StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
     marginTop: 16,
     textAlign: 'center',
   },
   emptySubtext: {
     fontSize: 14,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 8,
     textAlign: 'center',
   },
@@ -296,11 +296,11 @@ const getStyles = (theme: any) => StyleSheet.create({
     flex: 1,
   },
   categoryCard: {
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
     overflow: 'hidden',
   },
   categoryHeader: {
@@ -328,11 +328,11 @@ const getStyles = (theme: any) => StyleSheet.create({
   categoryName: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
   },
   categoryStats: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 2,
   },
   categoryAmount: {
@@ -351,7 +351,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   progressBarBackground: {
     flex: 1,
     height: 6,
-    backgroundColor: theme.border,
+    backgroundColor: colors.border,
     borderRadius: 3,
     marginRight: 8,
   },
@@ -362,18 +362,18 @@ const getStyles = (theme: any) => StyleSheet.create({
   progressBarText: {
     fontSize: 12,
     fontWeight: '500',
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     minWidth: 40,
     textAlign: 'right',
   },
   subCategoriesContainer: {
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
     paddingTop: 12,
   },
   subCategoriesTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
     paddingHorizontal: 16,
     marginBottom: 8,
   },
@@ -384,7 +384,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   subCategoryInfo: {
     flexDirection: 'row',
@@ -405,16 +405,16 @@ const getStyles = (theme: any) => StyleSheet.create({
   subCategoryName: {
     fontSize: 14,
     fontWeight: '500',
-    color: theme.text,
+    color: colors.text,
   },
   subCategoryStats: {
     fontSize: 11,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 1,
   },
   subCategoryAmount: {
     fontSize: 14,
     fontWeight: '500',
-    color: theme.text,
+    color: colors.text,
   },
 });

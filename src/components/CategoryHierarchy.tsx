@@ -60,8 +60,8 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
   isExpanded,
   onToggleExpand,
 }) => {
-  const theme = useTheme();
-  const styles = getStyles(theme);
+  const { theme, colors } = useTheme();
+  const styles = getStyles(theme, colors);
   const hasSubcategories = category.subCategories && category.subCategories.length > 0;
   const indentWidth = level * 20;
 
@@ -332,7 +332,7 @@ export default CategoryHierarchy;
 
 
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: string, colors: any) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -345,7 +345,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   categoryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.card,
+    backgroundColor: colors.card,
     borderRadius: 8,
     marginHorizontal: 4,
     marginVertical: 2,
@@ -382,7 +382,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   categoryName: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
     marginBottom: 4,
   },
   categoryMeta: {
@@ -392,24 +392,24 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   categoryType: {
     fontSize: 12,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.7,
     marginRight: 12,
   },
   transactionCount: {
     fontSize: 12,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.5,
   },
   categoryDescription: {
     fontSize: 12,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.6,
     marginTop: 2,
   },
   monthlyBudget: {
     fontSize: 12,
-    color: theme.primary,
+    color: colors.primary,
     fontWeight: '500',
     marginTop: 2,
   },
@@ -425,7 +425,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   subcategoriesContainer: {
     marginTop: 4,
     borderLeftWidth: 2,
-    borderLeftColor: theme.border,
+    borderLeftColor: colors.border,
     marginLeft: 20,
   },
 });

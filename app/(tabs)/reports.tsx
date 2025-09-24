@@ -26,8 +26,8 @@ const reportTabs = [
 ] as const;
 
 export default function ReportsScreen() {
-  const theme = useTheme();
-  const styles = getStyles(theme);
+  const { theme, colors } = useTheme();
+  const styles = getStyles(theme, colors);
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<ReportTab>('dashboard');
   const [refreshing, setRefreshing] = useState(false);
@@ -92,7 +92,7 @@ export default function ReportsScreen() {
               <Ionicons
                 name={tab.icon as any}
                 size={20}
-                color={activeTab === tab.id ? theme.primary : theme.textSecondary}
+                color={activeTab === tab.id ? colors.primary : colors.textSecondary}
               />
               <Text
                 style={[
@@ -121,33 +121,33 @@ export default function ReportsScreen() {
   );
 }
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: string, colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
   },
   header: {
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
   },
   tabContainer: {
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   tabScrollContent: {
     paddingHorizontal: 20,
@@ -160,22 +160,22 @@ const getStyles = (theme: any) => StyleSheet.create({
     paddingVertical: 8,
     marginRight: 12,
     borderRadius: 20,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
   },
   activeTab: {
-    backgroundColor: theme.primaryLight,
-    borderColor: theme.primary,
+    backgroundColor: colors.primaryLight,
+    borderColor: colors.primary,
   },
   tabText: {
     fontSize: 14,
     fontWeight: '500',
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginLeft: 6,
   },
   activeTabText: {
-    color: theme.primary,
+    color: colors.primary,
     fontWeight: '600',
   },
   content: {

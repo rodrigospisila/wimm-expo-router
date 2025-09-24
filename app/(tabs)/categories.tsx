@@ -46,8 +46,8 @@ interface CreateCategoryData {
 }
 
 export default function CategoriesScreen() {
-  const theme = useTheme();
-  const styles = getStyles(theme);
+  const { theme, colors } = useTheme();
+  const styles = getStyles(theme, colors);
   const { getToken, signOut } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -670,10 +670,10 @@ export default function CategoriesScreen() {
   );
 }
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: string, colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -682,12 +682,12 @@ const getStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 50,
     paddingBottom: 10,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
   },
   headerActions: {
     flexDirection: 'row',
@@ -698,7 +698,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     marginLeft: 10,
   },
   activeViewButton: {
-    backgroundColor: theme.primary + '20',
+    backgroundColor: colors.primary + '20',
     borderRadius: 5,
   },
   headerButton: {
@@ -710,21 +710,21 @@ const getStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   filterButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     marginHorizontal: 5,
-    backgroundColor: theme.card,
+    backgroundColor: colors.card,
   },
   filterButtonActive: {
-    backgroundColor: theme.primary,
+    backgroundColor: colors.primary,
   },
   filterText: {
     fontSize: 14,
-    color: theme.text,
+    color: colors.text,
   },
   filterTextActive: {
     color: 'white',
@@ -742,12 +742,12 @@ const getStyles = (theme: any) => StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
     marginTop: 15,
   },
   createDefaultButton: {
     marginTop: 20,
-    backgroundColor: theme.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
@@ -758,7 +758,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -766,21 +766,21 @@ const getStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   modalCancelButton: {
     fontSize: 16,
-    color: theme.primary,
+    color: colors.primary,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
   },
   modalSaveButton: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: theme.primary,
+    color: colors.primary,
   },
   modalContent: {
     padding: 20,
@@ -791,12 +791,12 @@ const getStyles = (theme: any) => StyleSheet.create({
   formLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: theme.text,
+    color: colors.text,
     marginBottom: 8,
   },
   formInput: {
-    backgroundColor: theme.card,
-    color: theme.text,
+    backgroundColor: colors.card,
+    color: colors.text,
     padding: 12,
     borderRadius: 8,
     fontSize: 16,
@@ -811,16 +811,16 @@ const getStyles = (theme: any) => StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
     marginHorizontal: 5,
   },
   typeButtonActive: {
-    backgroundColor: theme.primary,
-    borderColor: theme.primary,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   typeText: {
     fontSize: 16,
-    color: theme.text,
+    color: colors.text,
   },
   typeTextActive: {
     color: 'white',
@@ -840,7 +840,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     borderColor: 'transparent',
   },
   selectedColor: {
-    borderColor: theme.primary,
+    borderColor: colors.primary,
   },
   iconSelector: {
     flexDirection: 'row',
@@ -853,11 +853,11 @@ const getStyles = (theme: any) => StyleSheet.create({
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: theme.card,
+    backgroundColor: colors.card,
     margin: 5,
   },
   selectedIcon: {
-    backgroundColor: theme.primary,
+    backgroundColor: colors.primary,
   },
   // Novos estilos para subcategorias
   categoryActions: {
@@ -867,14 +867,14 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   addSubcategoryButton: {
     padding: 8,
-    backgroundColor: theme.primary + '20',
+    backgroundColor: colors.primary + '20',
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
   formHint: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 8,
     fontStyle: 'italic',
   },
@@ -882,15 +882,15 @@ const getStyles = (theme: any) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: theme.card,
+    backgroundColor: colors.card,
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
   },
   parentCategorySelectorText: {
     fontSize: 16,
-    color: theme.text,
+    color: colors.text,
     flex: 1,
   },
   // Estilos para expansão de categorias
@@ -916,7 +916,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   subCategoryDescription: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 2,
   },
   subCategoryActions: {
@@ -924,7 +924,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   subCategoryTransactionCount: {
     fontSize: 11,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   deleteSubcategoryButton: {

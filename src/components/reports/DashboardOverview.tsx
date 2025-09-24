@@ -53,8 +53,8 @@ interface DashboardOverviewProps {
 }
 
 export default function DashboardOverview({ dateRange, refreshing }: DashboardOverviewProps) {
-  const theme = useTheme();
-  const styles = getStyles(theme);
+  const { theme, colors } = useTheme();
+  const styles = getStyles(theme, colors);
   const { getToken, signOut } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -113,7 +113,7 @@ export default function DashboardOverview({ dateRange, refreshing }: DashboardOv
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Ionicons name="analytics" size={48} color={theme.textSecondary} />
+        <Ionicons name="analytics" size={48} color={colors.textSecondary} />
         <Text style={styles.loadingText}>Carregando dashboard...</Text>
       </View>
     );
@@ -122,7 +122,7 @@ export default function DashboardOverview({ dateRange, refreshing }: DashboardOv
   if (!data) {
     return (
       <View style={styles.emptyContainer}>
-        <Ionicons name="bar-chart-outline" size={64} color={theme.textSecondary} />
+        <Ionicons name="bar-chart-outline" size={64} color={colors.textSecondary} />
         <Text style={styles.emptyText}>Nenhum dado encontrado</Text>
         <Text style={styles.emptySubtext}>
           Adicione algumas transações para ver o dashboard
@@ -137,7 +137,7 @@ export default function DashboardOverview({ dateRange, refreshing }: DashboardOv
       <View style={styles.summaryCards}>
         <View style={[styles.card, styles.balanceCard]}>
           <View style={styles.cardHeader}>
-            <Ionicons name="wallet" size={24} color={theme.primary} />
+            <Ionicons name="wallet" size={24} color={colors.primary} />
             <Text style={styles.cardTitle}>Saldo Total</Text>
           </View>
           <Text style={[styles.cardValue, styles.balanceValue]}>
@@ -173,22 +173,22 @@ export default function DashboardOverview({ dateRange, refreshing }: DashboardOv
         <Text style={styles.sectionTitle}>Estatísticas</Text>
         <View style={styles.statsGrid}>
           <View style={styles.statItem}>
-            <Ionicons name="card" size={24} color={theme.primary} />
+            <Ionicons name="card" size={24} color={colors.primary} />
             <Text style={styles.statValue}>{data.walletsCount}</Text>
             <Text style={styles.statLabel}>Carteiras</Text>
           </View>
           <View style={styles.statItem}>
-            <Ionicons name="swap-horizontal" size={24} color={theme.primary} />
+            <Ionicons name="swap-horizontal" size={24} color={colors.primary} />
             <Text style={styles.statValue}>{data.transactionsCount}</Text>
             <Text style={styles.statLabel}>Transações</Text>
           </View>
           <View style={styles.statItem}>
-            <Ionicons name="folder" size={24} color={theme.primary} />
+            <Ionicons name="folder" size={24} color={colors.primary} />
             <Text style={styles.statValue}>{data.categoriesCount}</Text>
             <Text style={styles.statLabel}>Categorias</Text>
           </View>
           <View style={styles.statItem}>
-            <Ionicons name="time" size={24} color={theme.primary} />
+            <Ionicons name="time" size={24} color={colors.primary} />
             <Text style={styles.statValue}>{data.pendingInstallments}</Text>
             <Text style={styles.statLabel}>Parcelas</Text>
           </View>
@@ -247,7 +247,7 @@ export default function DashboardOverview({ dateRange, refreshing }: DashboardOv
   );
 }
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: string, colors: any) => StyleSheet.create({
   container: {
     padding: 16,
   },
@@ -259,7 +259,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 16,
   },
   emptyContainer: {
@@ -271,13 +271,13 @@ const getStyles = (theme: any) => StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
     marginTop: 16,
     textAlign: 'center',
   },
   emptySubtext: {
     fontSize: 14,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 8,
     textAlign: 'center',
   },
@@ -285,11 +285,11 @@ const getStyles = (theme: any) => StyleSheet.create({
     marginBottom: 24,
   },
   card: {
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
   },
   balanceCard: {
     marginBottom: 12,
@@ -309,17 +309,17 @@ const getStyles = (theme: any) => StyleSheet.create({
   cardTitle: {
     fontSize: 14,
     fontWeight: '500',
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginLeft: 8,
   },
   cardValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
   },
   balanceValue: {
     fontSize: 28,
-    color: theme.primary,
+    color: colors.primary,
   },
   statsContainer: {
     marginBottom: 24,
@@ -327,7 +327,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
     marginBottom: 16,
   },
   statsGrid: {
@@ -341,12 +341,12 @@ const getStyles = (theme: any) => StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
     marginTop: 8,
   },
   statLabel: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 4,
   },
   topCategoriesContainer: {
@@ -358,7 +358,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   categoryInfo: {
     flexDirection: 'row',
@@ -379,17 +379,17 @@ const getStyles = (theme: any) => StyleSheet.create({
   categoryName: {
     fontSize: 16,
     fontWeight: '500',
-    color: theme.text,
+    color: colors.text,
   },
   categoryPercentage: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 2,
   },
   categoryAmount: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
   },
   recentTransactionsContainer: {
     marginBottom: 24,
@@ -400,7 +400,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   transactionInfo: {
     flexDirection: 'row',
@@ -421,11 +421,11 @@ const getStyles = (theme: any) => StyleSheet.create({
   transactionDescription: {
     fontSize: 16,
     fontWeight: '500',
-    color: theme.text,
+    color: colors.text,
   },
   transactionCategory: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 2,
   },
   transactionAmount: {

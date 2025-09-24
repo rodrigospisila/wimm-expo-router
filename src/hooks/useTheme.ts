@@ -3,6 +3,12 @@ import { lightTheme, darkTheme } from '../theme/colors';
 
 export const useTheme = () => {
   const deviceTheme = useColorScheme();
-  const theme = deviceTheme === 'dark' ? darkTheme : lightTheme;
-  return theme;
+  const isDark = deviceTheme === 'dark';
+  const colors = isDark ? darkTheme : lightTheme;
+  
+  return {
+    theme: isDark ? 'dark' : 'light',
+    colors,
+    isDark,
+  };
 };

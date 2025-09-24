@@ -35,8 +35,8 @@ type TimePeriod = 'daily' | 'weekly' | 'monthly';
 const { width } = Dimensions.get('window');
 
 export default function TimeAnalysis({ dateRange, refreshing }: TimeAnalysisProps) {
-  const theme = useTheme();
-  const styles = getStyles(theme);
+  const { theme, colors } = useTheme();
+  const styles = getStyles(theme, colors);
   const { getToken, signOut } = useAuth();
   const [timeData, setTimeData] = useState<TimeData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -149,7 +149,7 @@ export default function TimeAnalysis({ dateRange, refreshing }: TimeAnalysisProp
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Ionicons name="trending-up" size={48} color={theme.textSecondary} />
+        <Ionicons name="trending-up" size={48} color={colors.textSecondary} />
         <Text style={styles.loadingText}>Carregando análise...</Text>
       </View>
     );
@@ -182,7 +182,7 @@ export default function TimeAnalysis({ dateRange, refreshing }: TimeAnalysisProp
 
       {timeData.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="trending-up-outline" size={64} color={theme.textSecondary} />
+          <Ionicons name="trending-up-outline" size={64} color={colors.textSecondary} />
           <Text style={styles.emptyText}>Nenhum dado temporal encontrado</Text>
           <Text style={styles.emptySubtext}>
             Adicione transações para ver a análise temporal
@@ -285,7 +285,7 @@ export default function TimeAnalysis({ dateRange, refreshing }: TimeAnalysisProp
   );
 }
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: string, colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
@@ -298,13 +298,13 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 16,
   },
   periodContainer: {
     flexDirection: 'row',
     marginBottom: 20,
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     padding: 4,
   },
@@ -316,12 +316,12 @@ const getStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
   },
   periodButtonActive: {
-    backgroundColor: theme.primary,
+    backgroundColor: colors.primary,
   },
   periodButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: theme.textSecondary,
+    color: colors.textSecondary,
   },
   periodButtonTextActive: {
     color: 'white',
@@ -335,13 +335,13 @@ const getStyles = (theme: any) => StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
     marginTop: 16,
     textAlign: 'center',
   },
   emptySubtext: {
     fontSize: 14,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 8,
     textAlign: 'center',
   },
@@ -354,7 +354,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
     marginBottom: 16,
   },
   summaryGrid: {
@@ -363,23 +363,23 @@ const getStyles = (theme: any) => StyleSheet.create({
     gap: 12,
   },
   summaryItem: {
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     padding: 12,
     flex: 1,
     minWidth: '45%',
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
   },
   summaryLabel: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   summaryValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
   },
   chartSection: {
     marginBottom: 24,
@@ -402,14 +402,14 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   legendText: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
   },
   chartContainer: {
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     padding: 16,
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
   },
   chart: {
     flexDirection: 'row',
@@ -441,7 +441,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   chartLabel: {
     fontSize: 10,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 8,
     textAlign: 'center',
   },
@@ -449,12 +449,12 @@ const getStyles = (theme: any) => StyleSheet.create({
     marginBottom: 24,
   },
   periodDetailCard: {
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
   },
   periodDetailHeader: {
     flexDirection: 'row',
@@ -465,11 +465,11 @@ const getStyles = (theme: any) => StyleSheet.create({
   periodDetailTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
   },
   periodDetailTransactions: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
   },
   periodDetailValues: {
     flexDirection: 'row',
@@ -480,7 +480,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   periodDetailLabel: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   periodDetailAmount: {

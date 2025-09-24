@@ -73,19 +73,19 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const theme = useTheme();
+  const { theme, colors } = useTheme();
   const isDark = useColorScheme() === 'dark';
 
   const navigationTheme = {
     ...DefaultTheme,
     colors: {
       ...DefaultTheme.colors,
-      background: theme.background,
-      text: theme.text,
-      primary: theme.primary,
-      card: theme.card,
-      border: theme.border,
-      notification: theme.notification,
+      background: colors.background,
+      text: colors.text,
+      primary: colors.primary,
+      card: colors.card,
+      border: colors.border,
+      notification: colors.notification,
     },
   };
 
@@ -93,9 +93,9 @@ function RootLayoutNav() {
     ...(isDark ? MD3DarkTheme : MD3LightTheme),
     colors: {
       ...(isDark ? MD3DarkTheme.colors : MD3LightTheme.colors),
-      background: theme.background,
-      primary: theme.primary,
-      text: theme.text,
+      background: colors.background,
+      primary: colors.primary,
+      text: colors.text,
     },
   };
 

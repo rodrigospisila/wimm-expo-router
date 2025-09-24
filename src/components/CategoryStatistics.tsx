@@ -34,8 +34,8 @@ export const CategoryStatistics: React.FC<CategoryStatisticsProps> = ({
   selectedCategoryId,
   onCategorySelect,
 }) => {
-  const theme = useTheme();
-  const styles = getStyles(theme);
+  const { theme, colors } = useTheme();
+  const styles = getStyles(theme, colors);
   const { getToken, signOut } = useAuth();
   const [statistics, setStatistics] = useState<CategoryStatistic[]>([]);
   const [loading, setLoading] = useState(true);
@@ -496,21 +496,21 @@ export default CategoryStatistics;
 
 
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: string, colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 40,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
   },
   loadingText: {
     fontSize: 16,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.7,
     marginTop: 16,
   },
@@ -519,7 +519,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 40,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
   },
   errorText: {
     fontSize: 16,
@@ -529,7 +529,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     marginBottom: 24,
   },
   retryButton: {
-    backgroundColor: theme.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
@@ -543,31 +543,31 @@ const getStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 40,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
   },
   emptyText: {
     fontSize: 16,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.7,
     marginTop: 16,
     textAlign: 'center',
   },
   emptySubtext: {
     fontSize: 14,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.5,
     marginTop: 8,
     textAlign: 'center',
   },
   summaryContainer: {
     padding: 16,
-    backgroundColor: theme.card,
+    backgroundColor: colors.card,
     marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
     marginBottom: 16,
   },
   summaryCards: {
@@ -576,7 +576,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   summaryCard: {
     flex: 1,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 4,
@@ -592,11 +592,11 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   balanceCard: {
     borderLeftWidth: 4,
-    borderLeftColor: theme.primary,
+    borderLeftColor: colors.primary,
   },
   summaryLabel: {
     fontSize: 12,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.7,
     marginTop: 8,
     marginBottom: 4,
@@ -604,7 +604,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   summaryAmount: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
   },
   section: {
     marginBottom: 16,
@@ -614,7 +614,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 16,
   },
   statisticCard: {
-    backgroundColor: theme.card,
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 16,
     marginRight: 12,
@@ -639,18 +639,18 @@ const getStyles = (theme: any) => StyleSheet.create({
   categoryName: {
     fontSize: 14,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
     flex: 1,
   },
   amount: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
     marginBottom: 4,
   },
   transactionCount: {
     fontSize: 12,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.7,
     marginBottom: 8,
   },
@@ -659,7 +659,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   budgetBar: {
     height: 4,
-    backgroundColor: theme.border,
+    backgroundColor: colors.border,
     borderRadius: 2,
     marginBottom: 4,
   },
@@ -669,11 +669,11 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   budgetText: {
     fontSize: 10,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.7,
   },
   alertCard: {
-    backgroundColor: theme.card,
+    backgroundColor: colors.card,
     borderRadius: 8,
     padding: 16,
     marginHorizontal: 16,
@@ -693,18 +693,18 @@ const getStyles = (theme: any) => StyleSheet.create({
   alertTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
     marginLeft: 8,
   },
   alertCategory: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
     marginBottom: 4,
   },
   alertDetails: {
     fontSize: 14,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.7,
   },
 });

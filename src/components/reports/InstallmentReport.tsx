@@ -68,8 +68,8 @@ interface InstallmentReportProps {
 }
 
 export default function InstallmentReport({ dateRange, refreshing }: InstallmentReportProps) {
-  const theme = useTheme();
-  const styles = getStyles(theme);
+  const { theme, colors } = useTheme();
+  const styles = getStyles(theme, colors);
   const { getToken, signOut } = useAuth();
   const [installments, setInstallments] = useState<InstallmentData[]>([]);
   const [summary, setSummary] = useState<InstallmentSummary | null>(null);
@@ -144,7 +144,7 @@ export default function InstallmentReport({ dateRange, refreshing }: Installment
       case 'PENDING':
         return '#FF9800';
       default:
-        return theme.textSecondary;
+        return colors.textSecondary;
     }
   };
 
@@ -178,7 +178,7 @@ export default function InstallmentReport({ dateRange, refreshing }: Installment
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Ionicons name="card" size={48} color={theme.textSecondary} />
+        <Ionicons name="card" size={48} color={colors.textSecondary} />
         <Text style={styles.loadingText}>Carregando parcelas...</Text>
       </View>
     );
@@ -264,7 +264,7 @@ export default function InstallmentReport({ dateRange, refreshing }: Installment
 
       {installments.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="card-outline" size={64} color={theme.textSecondary} />
+          <Ionicons name="card-outline" size={64} color={colors.textSecondary} />
           <Text style={styles.emptyText}>Nenhuma parcela encontrada</Text>
           <Text style={styles.emptySubtext}>
             Crie parcelas para ver o relatório detalhado
@@ -302,7 +302,7 @@ export default function InstallmentReport({ dateRange, refreshing }: Installment
                   <Ionicons
                     name={expandedInstallments.has(installment.id) ? 'chevron-up' : 'chevron-down'}
                     size={20}
-                    color={theme.textSecondary}
+                    color={colors.textSecondary}
                   />
                 </View>
               </TouchableOpacity>
@@ -358,7 +358,7 @@ export default function InstallmentReport({ dateRange, refreshing }: Installment
   );
 }
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: string, colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
@@ -371,7 +371,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 16,
   },
   summaryContainer: {
@@ -380,7 +380,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
     marginBottom: 16,
   },
   summaryGrid: {
@@ -390,21 +390,21 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   summaryCard: {
     flex: 1,
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
   },
   summaryValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
   },
   summaryLabel: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 4,
   },
   amountSummary: {
@@ -413,15 +413,15 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   amountItem: {
     flex: 1,
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     padding: 12,
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
   },
   amountLabel: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   amountValue: {
@@ -437,7 +437,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   paymentInfo: {
     flex: 1,
@@ -445,22 +445,22 @@ const getStyles = (theme: any) => StyleSheet.create({
   paymentDescription: {
     fontSize: 16,
     fontWeight: '500',
-    color: theme.text,
+    color: colors.text,
   },
   paymentDetails: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 2,
   },
   paymentAmount: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
   },
   filterContainer: {
     flexDirection: 'row',
     marginBottom: 20,
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     padding: 4,
   },
@@ -472,12 +472,12 @@ const getStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
   },
   filterButtonActive: {
-    backgroundColor: theme.primary,
+    backgroundColor: colors.primary,
   },
   filterButtonText: {
     fontSize: 12,
     fontWeight: '500',
-    color: theme.textSecondary,
+    color: colors.textSecondary,
   },
   filterButtonTextActive: {
     color: 'white',
@@ -491,13 +491,13 @@ const getStyles = (theme: any) => StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
     marginTop: 16,
     textAlign: 'center',
   },
   emptySubtext: {
     fontSize: 14,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 8,
     textAlign: 'center',
   },
@@ -505,11 +505,11 @@ const getStyles = (theme: any) => StyleSheet.create({
     flex: 1,
   },
   installmentCard: {
-    backgroundColor: theme.surface,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
     overflow: 'hidden',
   },
   installmentHeader: {
@@ -537,11 +537,11 @@ const getStyles = (theme: any) => StyleSheet.create({
   installmentDescription: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
   },
   installmentProgress: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 2,
   },
   installmentAmount: {
@@ -550,7 +550,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   installmentTotalAmount: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
   },
   statusBadge: {
     flexDirection: 'row',
@@ -569,7 +569,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     fontWeight: '500',
   },
   installmentDetailsContainer: {
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
     paddingTop: 16,
   },
   progressBar: {
@@ -578,7 +578,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   progressBarBackground: {
     height: 6,
-    backgroundColor: theme.border,
+    backgroundColor: colors.border,
     borderRadius: 3,
     marginBottom: 8,
   },
@@ -589,7 +589,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   progressText: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   installmentItem: {
@@ -599,7 +599,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   installmentItemInfo: {
     flex: 1,
@@ -607,11 +607,11 @@ const getStyles = (theme: any) => StyleSheet.create({
   installmentNumber: {
     fontSize: 14,
     fontWeight: '500',
-    color: theme.text,
+    color: colors.text,
   },
   installmentDueDate: {
     fontSize: 12,
-    color: theme.textSecondary,
+    color: colors.textSecondary,
     marginTop: 2,
   },
   installmentItemAmount: {
@@ -620,7 +620,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   installmentItemValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: theme.text,
+    color: colors.text,
   },
   installmentStatus: {
     paddingHorizontal: 8,

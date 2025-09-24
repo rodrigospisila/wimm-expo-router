@@ -70,8 +70,8 @@ interface CreateTransactionData {
 }
 
 export default function TransactionsScreen() {
-  const theme = useTheme();
-  const styles = getStyles(theme);
+  const { theme, colors } = useTheme();
+  const styles = getStyles(theme, colors);
   const { getToken, signOut } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [wallets, setWallets] = useState<Wallet[]>([]);
@@ -849,10 +849,10 @@ const styles = StyleSheet.create({
 
 
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: string, colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -861,12 +861,12 @@ const getStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 50,
     paddingBottom: 10,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
   },
   addButton: {
     padding: 5,
@@ -877,14 +877,14 @@ const getStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   summaryCard: {
     alignItems: 'center',
   },
   summaryLabel: {
     fontSize: 14,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.7,
   },
   summaryAmount: {
@@ -897,21 +897,21 @@ const getStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   filterButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     marginHorizontal: 5,
-    backgroundColor: theme.card,
+    backgroundColor: colors.card,
   },
   activeFilterButton: {
-    backgroundColor: theme.primary,
+    backgroundColor: colors.primary,
   },
   filterText: {
     fontSize: 14,
-    color: theme.text,
+    color: colors.text,
   },
   activeFilterText: {
     color: 'white',
@@ -925,7 +925,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   transactionIcon: {
     marginRight: 15,
@@ -943,17 +943,17 @@ const getStyles = (theme: any) => StyleSheet.create({
   transactionDescription: {
     fontSize: 16,
     fontWeight: '500',
-    color: theme.text,
+    color: colors.text,
   },
   transactionCategory: {
     fontSize: 13,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.6,
     marginTop: 2,
   },
   transactionDate: {
     fontSize: 12,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.5,
     marginTop: 2,
   },
@@ -966,7 +966,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   walletText: {
     fontSize: 12,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.6,
     marginTop: 2,
   },
@@ -979,19 +979,19 @@ const getStyles = (theme: any) => StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
     marginTop: 15,
   },
   emptySubtext: {
     fontSize: 14,
-    color: theme.text,
+    color: colors.text,
     opacity: 0.7,
     textAlign: 'center',
     marginTop: 5,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: theme.background,
+    backgroundColor: colors.background,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -999,19 +999,19 @@ const getStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    borderBottomColor: colors.border,
   },
   modalCloseButton: {
     padding: 5,
   },
   modalCloseText: {
     fontSize: 16,
-    color: theme.primary,
+    color: colors.primary,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: theme.text,
+    color: colors.text,
   },
   modalSaveButton: {
     padding: 5,
@@ -1019,7 +1019,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   modalSaveText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: theme.primary,
+    color: colors.primary,
   },
   modalContent: {
     padding: 20,
@@ -1030,12 +1030,12 @@ const getStyles = (theme: any) => StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: theme.text,
+    color: colors.text,
     marginBottom: 8,
   },
   textInput: {
-    backgroundColor: theme.card,
-    color: theme.text,
+    backgroundColor: colors.card,
+    color: colors.text,
     padding: 12,
     borderRadius: 8,
     fontSize: 16,
@@ -1052,12 +1052,12 @@ const getStyles = (theme: any) => StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
     marginHorizontal: 5,
   },
   activeTypeButton: {
-    backgroundColor: theme.primary,
-    borderColor: theme.primary,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   typeText: {
     fontSize: 16,
@@ -1076,12 +1076,12 @@ const getStyles = (theme: any) => StyleSheet.create({
     padding: 10,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: colors.border,
     marginRight: 10,
   },
   selectedWalletOption: {
-    backgroundColor: theme.primary,
-    borderColor: theme.primary,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   walletIcon: {
     width: 24,
@@ -1093,7 +1093,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   walletName: {
     fontSize: 14,
-    color: theme.text,
+    color: colors.text,
   },
   selectedWalletName: {
     color: 'white',
