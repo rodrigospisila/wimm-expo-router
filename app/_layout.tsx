@@ -12,6 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import { useTheme } from '../src/hooks/useTheme';
 import { AuthProvider } from '../src/contexts/AuthContext';
+import { ThemeProvider as CustomThemeProvider } from '../src/contexts/ThemeContext';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -69,7 +70,11 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <CustomThemeProvider>
+      <RootLayoutNav />
+    </CustomThemeProvider>
+  );
 }
 
 function RootLayoutNav() {
