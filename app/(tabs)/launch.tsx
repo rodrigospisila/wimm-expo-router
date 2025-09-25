@@ -165,6 +165,7 @@ export default function LaunchV2Screen() {
     setShowPaymentMethodModal(false);
   };
 
+  // Função para formatar entrada do usuário (string de dígitos)
   const formatCurrency = (value: string) => {
     // Remove tudo que não é número
     const numericValue = value.replace(/[^0-9]/g, '');
@@ -177,6 +178,20 @@ export default function LaunchV2Screen() {
       style: 'currency',
       currency: 'BRL',
     }).format(floatValue || 0);
+  };
+
+  // Função para formatar valores numéricos já em formato decimal
+  const formatCurrencyFromNumber = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value || 0);
+  };
+
+  // Função para formatar saldos que vêm do backend
+  const formatBalance = (balance: number) => {
+    // O saldo já vem em formato decimal do backend
+    return formatCurrencyFromNumber(balance);
   };
 
   const handleAmountChange = (text: string) => {
@@ -193,12 +208,7 @@ export default function LaunchV2Screen() {
     return total / count;
   };
 
-  const formatCurrencyFromNumber = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
+
 
   const handleSubmit = async () => {
     try {
@@ -491,7 +501,7 @@ export default function LaunchV2Screen() {
                       {selectedPaymentMethod.name}
                     </Text>
                     <Text style={styles.selectedItemBalance}>
-                      Saldo: {formatCurrency((selectedPaymentMethod.currentBalance * 100).toString())}
+                      Saldo: {formatBalance(selectedPaymentMethod.currentBalance)}
                     </Text>
                   </View>
                 </View>
@@ -656,7 +666,7 @@ export default function LaunchV2Screen() {
                           <View style={styles.paymentMethodDetails}>
                             <Text style={styles.paymentMethodName}>{method.name}</Text>
                             <Text style={styles.paymentMethodBalance}>
-                              {formatCurrency((method.currentBalance * 100).toString())}
+                              {formatBalance(method.currentBalance)}
                             </Text>
                           </View>
                         </TouchableOpacity>
@@ -693,7 +703,7 @@ export default function LaunchV2Screen() {
                         <View style={styles.paymentMethodDetails}>
                           <Text style={styles.paymentMethodName}>{method.name}</Text>
                           <Text style={styles.paymentMethodBalance}>
-                            {formatCurrency((method.currentBalance * 100).toString())}
+                            {formatBalance(method.currentBalance)}
                           </Text>
                         </View>
                       </TouchableOpacity>
