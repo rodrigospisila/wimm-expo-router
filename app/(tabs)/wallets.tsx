@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
-import { api } from '../../src/services/api';
+import { api, walletService } from '../../src/services/api';
 import { useAuth } from '../../src/contexts/AuthContext';
 
 interface PaymentMethod {
@@ -98,14 +98,9 @@ export default function WalletsV2Screen() {
 
   const loadOverview = useCallback(async () => {
     try {
-      const token = await getToken();
-      if (!token) return;
-
-      const response = await api.get('/wallets-v2/overview', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      setOverview(response.data);
+      setLoading(true);
+      const response = await walletService.getOverview();
+      setOverview(response);
     } catch (error) {
       console.error('Erro ao carregar visão geral:', error);
       Alert.alert('Erro', 'Não foi possível carregar as carteiras');
@@ -113,37 +108,25 @@ export default function WalletsV2Screen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [getToken]);
+  }, []);
 
   const loadGroupTypes = useCallback(async () => {
     try {
-      const token = await getToken();
-      if (!token) return;
-
-      const response = await api.get('/wallets-v2/groups/types', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      setGroupTypes(response.data.types);
+      const response = await walletService.getGroupTypes();
+      setGroupTypes(response.types);
     } catch (error) {
       console.error('Erro ao carregar tipos de grupo:', error);
     }
-  }, [getToken]);
+  }, []);
 
   const loadPaymentMethodTypes = useCallback(async () => {
     try {
-      const token = await getToken();
-      if (!token) return;
-
-      const response = await api.get('/wallets-v2/payment-methods/types', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      setPaymentMethodTypes(response.data.types);
+      const response = await walletService.getPaymentMethodTypes();
+      setPaymentMethodTypes(response.types);
     } catch (error) {
       console.error('Erro ao carregar tipos de método de pagamento:', error);
     }
-  }, [getToken]);
+  }, []);
 
   useEffect(() => {
     loadOverview();
@@ -223,9 +206,7 @@ export default function WalletsV2Screen() {
         });
       } else {
         // Criar novo grupo
-        await api.post('/wallets-v2/groups', groupForm, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await walletService.createGroup(groupForm);
       }
 
       setShowGroupModal(false);
@@ -242,9 +223,7 @@ export default function WalletsV2Screen() {
       const token = await getToken();
       if (!token) return;
 
-      await api.post('/wallets-v2/payment-methods', paymentMethodForm, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await walletService.createPaymentMethod(paymentMethodForm);
 
       setShowPaymentMethodModal(false);
       loadOverview();
@@ -260,9 +239,7 @@ export default function WalletsV2Screen() {
       const token = await getToken();
       if (!token) return;
 
-      await api.post('/wallets-v2/groups/create-defaults', {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await walletService.createDefaultGroups();
 
       loadOverview();
       Alert.alert('Sucesso', 'Grupos padrão criados!');
