@@ -145,108 +145,129 @@ export const authService = {
 };
 
 export const walletService = {
-  async getAll(type?: string): Promise<Wallet[]> {
-    const params = type ? { type } : {};
-    const response = await api.get('/wallets', { params });
-    return response.data;
-  },
-
-  async getById(id: number): Promise<Wallet> {
-    const response = await api.get(`/wallets/${id}`);
-    return response.data;
-  },
-
-  async create(data: {
-    name: string;
-    type?: string;
-    initialBalance?: number;
-    description?: string;
-    color?: string;
-    icon?: string;
-  }): Promise<Wallet> {
-    const response = await api.post('/wallets', data);
-    return response.data;
-  },
-
-  async update(id: number, data: {
-    name?: string;
-    type?: string;
-    currentBalance?: number;
-    description?: string;
-    color?: string;
-    icon?: string;
-    isActive?: boolean;
-  }): Promise<Wallet> {
-    const response = await api.patch(`/wallets/${id}`, data);
-    return response.data;
-  },
-
-  async delete(id: number): Promise<void> {
-    await api.delete(`/wallets/${id}`);
-  },
-
-  async toggleActive(id: number): Promise<Wallet> {
-    const response = await api.patch(`/wallets/${id}/toggle-active`);
-    return response.data;
-  },
-
-  async getSummary(): Promise<{
+  // Métodos V2 (principais)
+  async getOverview(): Promise<{
     totalBalance: number;
-    walletsCount: number;
-    walletsByType: Record<string, { count: number; balance: number }>;
-    wallets: Array<{
+    monthlyIncome: number;
+    monthlyExpenses: number;
+    monthlyBalance: number;
+    groupsCount: number;
+    paymentMethodsCount: number;
+    transactionsCount: number;
+    groups: Array<{
+      id: number;
+      name: string;
+      type: string;
+      color: string;
+      icon: string;
+      totalBalance: number;
+      paymentMethodsCount: number;
+    }>;
+  }> {
+    const response = await api.get('/wallets-v2/overview');
+    return response.data;
+  },
+
+  async getGroups(): Promise<Array<{
+    id: number;
+    name: string;
+    type: string;
+    description: string;
+    color: string;
+    icon: string;
+    isActive: boolean;
+    hasIntegratedPix: boolean;
+    hasWalletBalance: boolean;
+    paymentMethods: Array<{
       id: number;
       name: string;
       type: string;
       currentBalance: number;
+      creditLimit?: number;
+      availableLimit?: number;
+      isPrimary: boolean;
       color: string;
       icon: string;
     }>;
-  }> {
-    const response = await api.get('/wallets/summary');
+  }>> {
+    const response = await api.get('/wallets-v2/groups');
     return response.data;
   },
 
-  async getStatistics(): Promise<{
-    totalWallets: number;
-    activeWallets: number;
-    totalBalance: number;
-    monthlyTransactions: number;
-    averageBalance: number;
-    highestBalance: number;
-    lowestBalance: number;
-    mostUsedWallet: Wallet | null;
-  }> {
-    const response = await api.get('/wallets/statistics');
+  async getPaymentMethods(): Promise<Array<{
+    id: number;
+    name: string;
+    type: string;
+    currentBalance: number;
+    creditLimit?: number;
+    availableLimit?: number;
+    isPrimary: boolean;
+    color: string;
+    icon: string;
+    walletGroup: {
+      id: number;
+      name: string;
+      color: string;
+      icon: string;
+    };
+  }>> {
+    const response = await api.get('/wallets-v2/payment-methods');
     return response.data;
   },
 
-  async getBalanceHistory(id: number, days: number = 30): Promise<{
-    walletId: number;
-    walletName: string;
-    period: string;
-    history: Array<{ date: string; balance: number }>;
+  async getGroupTypes(): Promise<{
+    types: Array<{ value: string; label: string; description: string; icon: string }>;
   }> {
-    const response = await api.get(`/wallets/${id}/balance-history`, {
-      params: { days },
-    });
+    const response = await api.get('/wallets-v2/groups/types');
     return response.data;
   },
 
-  async getTypes(): Promise<{
-    types: Array<{ value: string; label: string; icon: string }>;
+  async getPaymentMethodTypes(): Promise<{
+    types: Array<{ value: string; label: string; description: string; icon: string }>;
   }> {
-    const response = await api.get('/wallets/types');
+    const response = await api.get('/wallets-v2/payment-methods/types');
     return response.data;
   },
 
-  // Métodos de compatibilidade com versão anterior
-  async getWallets(): Promise<Wallet[]> {
-    return this.getAll();
+  async createGroup(data: {
+    name: string;
+    type: string;
+    description?: string;
+    color?: string;
+    icon?: string;
+    hasIntegratedPix?: boolean;
+    hasWalletBalance?: boolean;
+  }): Promise<any> {
+    const response = await api.post('/wallets-v2/groups', data);
+    return response.data;
   },
 
-  async createWallet(name: string, initialBalance: number): Promise<Wallet> {
-    return this.create({ name, initialBalance });
+  async createPaymentMethod(data: {
+    name: string;
+    type: string;
+    walletGroupId: number;
+    currentBalance?: number;
+    creditLimit?: number;
+    closingDay?: number;
+    dueDay?: number;
+    isPrimary?: boolean;
+    color?: string;
+    icon?: string;
+  }): Promise<any> {
+    const response = await api.post('/wallets-v2/payment-methods', data);
+    return response.data;
+  },
+
+  async createDefaultGroups(): Promise<any> {
+    const response = await api.post('/wallets-v2/groups/create-defaults');
+    return response.data;
+  },
+
+  // Métodos de compatibilidade V1
+  async getAll(type?: string): Promise<Wallet[]> {
+    const params = type ? { type } : {};
+    const response = await api.get('/wallets', { params });
+    return response.data;
   },
 
   async getWalletsSummary(): Promise<{
@@ -254,24 +275,25 @@ export const walletService = {
     walletsCount: number;
     wallets: Array<{ id: number; name: string; currentBalance: number }>;
   }> {
-    const summary = await this.getSummary();
-    return {
-      totalBalance: summary.totalBalance,
-      walletsCount: summary.walletsCount,
-      wallets: summary.wallets.map(w => ({
-        id: w.id,
-        name: w.name,
-        currentBalance: w.currentBalance,
-      })),
-    };
-  },
-
-  async updateWallet(id: number, data: { name?: string; currentBalance?: number }): Promise<Wallet> {
-    return this.update(id, data);
-  },
-
-  async deleteWallet(id: number): Promise<void> {
-    return this.delete(id);
+    try {
+      const overview = await this.getOverview();
+      return {
+        totalBalance: overview.totalBalance,
+        walletsCount: overview.groupsCount,
+        wallets: overview.groups?.map(g => ({
+          id: g.id,
+          name: g.name,
+          currentBalance: g.totalBalance,
+        })) || [],
+      };
+    } catch (error) {
+      console.error('Erro ao obter resumo das carteiras:', error);
+      return {
+        totalBalance: 0,
+        walletsCount: 0,
+        wallets: [],
+      };
+    }
   },
 };
 
@@ -286,8 +308,11 @@ export const transactionService = {
     amount: number;
     type: 'INCOME' | 'EXPENSE';
     categoryId: number;
-    walletId: number;
+    subcategoryId?: number;
+    paymentMethodId: number;
     date: string;
+    notes?: string;
+    installmentNumber?: number;
   }): Promise<Transaction> {
     const response = await api.post('/transactions', data);
     return response.data;
@@ -302,6 +327,11 @@ export const categoryService = {
 
   async createCategory(name: string, parentId?: number): Promise<Category> {
     const response = await api.post('/categories', { name, parentId });
+    return response.data;
+  },
+
+  async createDefaults(): Promise<any> {
+    const response = await api.post('/categories/create-defaults');
     return response.data;
   },
 };
