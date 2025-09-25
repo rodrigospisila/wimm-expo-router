@@ -323,9 +323,7 @@ export const transactionService = {
     installmentCount: number;
     paymentMethodId: number;
     categoryId: number;
-    subcategoryId?: number;
-    startDate?: string;
-    installmentType?: string;
+    installmentType: string;
     notes?: string;
   }): Promise<any> {
     const response = await api.post('/transactions/installments', data);

@@ -238,15 +238,13 @@ export default function LaunchV2Screen() {
           installmentCount: parseInt(installmentCount),
           paymentMethodId: selectedPaymentMethod.id,
           categoryId: selectedSubcategory?.id || selectedCategory.id,
-          subcategoryId: selectedSubcategory?.id || null,
-          startDate: new Date().toISOString(),
           installmentType: selectedPaymentMethod.type === 'CREDIT_CARD' ? 'CREDIT_CARD' : 'FIXED',
           notes: notes.trim() || null,
         };
 
         await transactionService.createInstallment(installmentData);
         
-        Alert.alert('Sucesso', `Parcela criada com ${installmentCount}x de ${formatCurrency((getNumericAmount() * 100).toString())}`);
+        Alert.alert('Sucesso', `Parcela criada com ${installmentCount}x de ${formatCurrency(calculateInstallmentValue().toString())}`);
       } else {
         // Criar transação à vista
         await transactionService.createTransaction(transactionData);
@@ -418,7 +416,7 @@ export default function LaunchV2Screen() {
           />
           {paymentForm === 'INSTALLMENT' && amount && (
             <Text style={styles.installmentPreview}>
-              {installmentCount}x de {formatCurrency((calculateInstallmentValue() * 100).toString())}
+              {installmentCount}x de {formatCurrency(calculateInstallmentValue().toString())}
             </Text>
           )}
         </View>
