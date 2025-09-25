@@ -74,6 +74,7 @@ export default function LaunchV2Screen() {
   // Dados carregados
   const [categories, setCategories] = useState<Category[]>([]);
   const [walletGroups, setWalletGroups] = useState<WalletGroup[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [independentMethods, setIndependentMethods] = useState<PaymentMethod[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
