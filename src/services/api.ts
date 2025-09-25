@@ -310,11 +310,25 @@ export const transactionService = {
     categoryId: number;
     subcategoryId?: number;
     paymentMethodId: number;
-    date: string;
     notes?: string;
     installmentNumber?: number;
   }): Promise<Transaction> {
     const response = await api.post('/transactions', data);
+    return response.data;
+  },
+
+  async createInstallment(data: {
+    description: string;
+    totalAmount: number;
+    installmentCount: number;
+    paymentMethodId: number;
+    categoryId: number;
+    subcategoryId?: number;
+    startDate?: string;
+    installmentType?: string;
+    notes?: string;
+  }): Promise<any> {
+    const response = await api.post('/transactions/installments', data);
     return response.data;
   },
 };

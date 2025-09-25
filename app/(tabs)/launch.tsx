@@ -222,8 +222,7 @@ export default function LaunchV2Screen() {
 
       const transactionData = {
         description: description.trim(),
-        amount: transactionType === 'EXPENSE' ? -getNumericAmount() : getNumericAmount(),
-        date: new Date().toISOString(),
+        amount: getNumericAmount(),
         type: transactionType,
         paymentMethodId: selectedPaymentMethod.id,
         categoryId: selectedSubcategory?.id || selectedCategory.id,
@@ -245,7 +244,7 @@ export default function LaunchV2Screen() {
           notes: notes.trim() || null,
         };
 
-        await transactionService.createTransaction(installmentData);
+        await transactionService.createInstallment(installmentData);
         
         Alert.alert('Sucesso', `Parcela criada com ${installmentCount}x de ${formatCurrency((getNumericAmount() * 100).toString())}`);
       } else {
