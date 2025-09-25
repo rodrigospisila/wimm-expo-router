@@ -298,8 +298,65 @@ export const walletService = {
 };
 
 export const transactionService = {
-  async getTransactions(): Promise<Transaction[]> {
-    const response = await api.get('/transactions');
+  async getTransactions(filters?: {
+    startDate?: string;
+    endDate?: string;
+    categoryId?: number;
+    paymentMethodId?: number;
+    type?: 'INCOME' | 'EXPENSE';
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{
+    transactions: Array<{
+      id: number;
+      description: string;
+      amount: number;
+      type: 'INCOME' | 'EXPENSE';
+      date: string;
+      category: {
+        id: number;
+        name: string;
+        color: string;
+        icon: string;
+        type: string;
+      };
+      paymentMethod: {
+        id: number;
+        name: string;
+        type: string;
+        color: string;
+        walletGroup?: {
+          id: number;
+          name: string;
+          color: string;
+          icon: string;
+        };
+      };
+      installment?: {
+        id: number;
+        installmentCount: number;
+        currentInstallment: number;
+      };
+    }>;
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  }> {
+    const params: any = {};
+    if (filters?.startDate) params.startDate = filters.startDate;
+    if (filters?.endDate) params.endDate = filters.endDate;
+    if (filters?.categoryId) params.categoryId = filters.categoryId;
+    if (filters?.paymentMethodId) params.paymentMethodId = filters.paymentMethodId;
+    if (filters?.type) params.type = filters.type;
+    if (filters?.search) params.search = filters.search;
+    if (filters?.page) params.page = filters.page;
+    if (filters?.limit) params.limit = filters.limit;
+
+    const response = await api.get('/transactions', { params });
     return response.data;
   },
 
@@ -344,6 +401,242 @@ export const categoryService = {
 
   async createDefaults(): Promise<any> {
     const response = await api.post('/categories/create-defaults');
+    return response.data;
+  },
+};
+
+export const creditCardService = {
+  async getCreditCards(): Promise<Array<{
+    id: number;
+    name: string;
+    creditLimit: number;
+    availableLimit: number;
+    closingDay: number;
+    dueDay: number;
+    walletGroup?: {
+      name: string;
+      color: string;
+    };
+  }>> {
+    const response = await api.get('/credit-cards');
+    return response.data;
+  },
+
+  async getAllBills(): Promise<Array<{
+    id: number;
+    name: string;
+    creditLimit: number;
+    availableLimit: number;
+    closingDay: number;
+    dueDay: number;
+    currentBill: {
+      month: number;
+      year: number;
+      totalAmount: number;
+      paidAmount: number;
+      remainingAmount: number;
+      dueDate: string;
+      status: 'OPEN' | 'CLOSED' | 'PAID' | 'OVERDUE';
+      transactions: Array<{
+        id: number;
+        description: string;
+        amount: number;
+        date: string;
+        category: {
+          name: string;
+          color: string;
+          icon: string;
+        };
+        installmentInfo?: {
+          currentInstallment: number;
+          totalInstallments: number;
+        };
+      }>;
+    };
+    previousBills: Array<{
+      month: number;
+      year: number;
+      totalAmount: number;
+      paidAmount: number;
+      status: 'PAID' | 'OVERDUE';
+      dueDate: string;
+    }>;
+  }>> {
+    const response = await api.get('/credit-cards/bills');
+    return response.data;
+  },
+
+  async getCreditCardBill(cardId: number, month?: number, year?: number): Promise<{
+    id: number;
+    name: string;
+    creditLimit: number;
+    availableLimit: number;
+    closingDay: number;
+    dueDay: number;
+    currentBill: {
+      month: number;
+      year: number;
+      totalAmount: number;
+      paidAmount: number;
+      remainingAmount: number;
+      dueDate: string;
+      status: 'OPEN' | 'CLOSED' | 'PAID' | 'OVERDUE';
+      transactions: Array<{
+        id: number;
+        description: string;
+        amount: number;
+        date: string;
+        category: {
+          name: string;
+          color: string;
+          icon: string;
+        };
+        installmentInfo?: {
+          currentInstallment: number;
+          totalInstallments: number;
+        };
+      }>;
+    };
+    previousBills: Array<{
+      month: number;
+      year: number;
+      totalAmount: number;
+      paidAmount: number;
+      status: 'PAID' | 'OVERDUE';
+      dueDate: string;
+    }>;
+  }> {
+    const params: any = {};
+    if (month) params.month = month;
+    if (year) params.year = year;
+    
+    const response = await api.get(`/credit-cards/${cardId}/bill`, { params });
+    return response.data;
+  },
+
+  async updateLimit(cardId: number): Promise<{ message: string }> {
+    const response = await api.get(`/credit-cards/${cardId}/limit`);
+    return response.data;
+  },
+};
+
+export const reportsService = {
+  async getDashboard(startDate?: string, endDate?: string): Promise<{
+    period: {
+      startDate: string;
+      endDate: string;
+    };
+    summary: {
+      totalIncome: number;
+      totalExpense: number;
+      balance: number;
+      transactionCount: number;
+    };
+    topCategories: Array<{
+      id: number;
+      name: string;
+      amount: number;
+      percentage: number;
+      color: string;
+      icon: string;
+    }>;
+    recentTransactions: Array<{
+      id: number;
+      description: string;
+      amount: number;
+      type: 'INCOME' | 'EXPENSE';
+      date: string;
+      category: {
+        name: string;
+        color: string;
+        icon: string;
+      };
+    }>;
+    paymentMethodsUsage: Array<{
+      id: number;
+      name: string;
+      amount: number;
+      percentage: number;
+      type: string;
+    }>;
+  }> {
+    const params: any = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    
+    const response = await api.get('/reports/dashboard', { params });
+    return response.data;
+  },
+
+  async getOverview(): Promise<{
+    totalBalance: number;
+    monthlyIncome: number;
+    monthlyExpense: number;
+    monthlyBalance: number;
+    walletsCount: number;
+    transactionsCount: number;
+    categoriesCount: number;
+    activeInstallments: number;
+  }> {
+    const response = await api.get('/reports/overview');
+    return response.data;
+  },
+
+  async getCategoryReport(startDate?: string, endDate?: string, type?: string): Promise<{
+    categories: Array<{
+      id: number;
+      name: string;
+      amount: number;
+      percentage: number;
+      color: string;
+      icon: string;
+      subcategories?: Array<{
+        id: number;
+        name: string;
+        amount: number;
+        percentage: number;
+      }>;
+    }>;
+    total: number;
+  }> {
+    const params: any = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    if (type) params.type = type;
+    
+    const response = await api.get('/reports/categories', { params });
+    return response.data;
+  },
+
+  async getTimeAnalysis(period?: string): Promise<{
+    data: Array<{
+      period: string;
+      income: number;
+      expense: number;
+      balance: number;
+    }>;
+    comparison: {
+      previousPeriod: {
+        income: number;
+        expense: number;
+        balance: number;
+      };
+      currentPeriod: {
+        income: number;
+        expense: number;
+        balance: number;
+      };
+      percentageChange: {
+        income: number;
+        expense: number;
+        balance: number;
+      };
+    };
+  }> {
+    const params: any = {};
+    if (period) params.period = period;
+    
+    const response = await api.get('/reports/time-analysis', { params });
     return response.data;
   },
 };

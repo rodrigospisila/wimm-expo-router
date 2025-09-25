@@ -1,126 +1,308 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { Title, Text, Card, Button, List, Divider } from 'react-native-paper';
+import React, { useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import { 
+  Title, 
+  Text, 
+  Card, 
+  Button, 
+  Snackbar,
+  List,
+  Switch,
+  RadioButton,
+  Divider,
+} from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../../src/contexts/AuthContext';
-import { router } from 'expo-router';
+import { useTheme } from '../../src/hooks/useTheme';
+import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
+  const { colors, theme, themeMode, setThemeMode, toggleTheme } = useTheme();
+  const router = useRouter();
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+
+  function showSnackbar(message: string) {
+    setSnackbarMessage(message);
+    setSnackbarVisible(true);
+  }
 
   async function handleSignOut() {
-    try {
-      await signOut();
-      router.replace('/(auth)/login');
-    } catch (error) {
-      console.error('Error signing out:', error);
+    Alert.alert(
+      'Sair da Conta',
+      'Tem certeza que deseja sair da sua conta?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Sair', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+              showSnackbar('Logout realizado com sucesso');
+              router.replace('/(auth)/login');
+            } catch (error) {
+              console.error('Error signing out:', error);
+            }
+          }
+        },
+      ]
+    );
+  }
+
+  function handleThemeChange(mode: 'light' | 'dark' | 'system') {
+    setThemeMode(mode);
+    showSnackbar(`Tema alterado para ${mode === 'system' ? 'automático' : mode === 'dark' ? 'escuro' : 'claro'}`);
+  }
+
+  function getThemeLabel(mode: string) {
+    switch (mode) {
+      case 'light': return 'Claro';
+      case 'dark': return 'Escuro';
+      case 'system': return 'Automático';
+      default: return 'Automático';
     }
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView>
-        <View style={styles.header}>
-          <Title style={styles.title}>Perfil</Title>
-          <Text style={styles.subtitle}>Configurações da conta</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={[styles.header, { backgroundColor: colors.primary }]}>
+          <View style={styles.userInfo}>
+            <View style={styles.avatar}>
+              <MaterialIcons name="person" size={40} color="#fff" />
+            </View>
+            <View style={styles.userDetails}>
+              <Text style={styles.userName}>{user?.name || 'Usuário'}</Text>
+              <Text style={styles.userEmail}>{user?.email || 'email@exemplo.com'}</Text>
+            </View>
+          </View>
         </View>
 
-        {/* Informações do Usuário */}
-        <Card style={styles.card}>
+        {/* Configurações de Tema */}
+        <Card style={[styles.card, { backgroundColor: colors.card }]}>
           <Card.Content>
-            <View style={styles.userInfo}>
-              <View style={styles.avatar}>
-                <MaterialIcons name="person" size={48} color="#2e7d32" />
-              </View>
-              <View style={styles.userDetails}>
-                <Text style={styles.userName}>{user?.name || 'Usuário'}</Text>
-                <Text style={styles.userEmail}>{user?.email || 'email@exemplo.com'}</Text>
-              </View>
+            <View style={styles.sectionHeader}>
+              <MaterialIcons name="palette" size={24} color={colors.primary} />
+              <Title style={[styles.sectionTitle, { color: colors.text }]}>Aparência</Title>
             </View>
+            
+            <Text style={[styles.sectionDescription, { color: colors.textSecondary }]}>
+              Personalize a aparência do aplicativo
+            </Text>
+
+            <View style={styles.themeOptions}>
+              <TouchableOpacity
+                style={[
+                  styles.themeOption,
+                  { borderColor: colors.border },
+                  themeMode === 'light' && { borderColor: colors.primary, backgroundColor: colors.primarySurface }
+                ]}
+                onPress={() => handleThemeChange('light')}
+              >
+                <MaterialIcons 
+                  name="light-mode" 
+                  size={24} 
+                  color={themeMode === 'light' ? colors.primary : colors.textSecondary} 
+                />
+                <Text style={[
+                  styles.themeOptionText,
+                  { color: themeMode === 'light' ? colors.primary : colors.text }
+                ]}>
+                  Claro
+                </Text>
+                <RadioButton
+                  value="light"
+                  status={themeMode === 'light' ? 'checked' : 'unchecked'}
+                  onPress={() => handleThemeChange('light')}
+                  color={colors.primary}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.themeOption,
+                  { borderColor: colors.border },
+                  themeMode === 'dark' && { borderColor: colors.primary, backgroundColor: colors.primarySurface }
+                ]}
+                onPress={() => handleThemeChange('dark')}
+              >
+                <MaterialIcons 
+                  name="dark-mode" 
+                  size={24} 
+                  color={themeMode === 'dark' ? colors.primary : colors.textSecondary} 
+                />
+                <Text style={[
+                  styles.themeOptionText,
+                  { color: themeMode === 'dark' ? colors.primary : colors.text }
+                ]}>
+                  Escuro
+                </Text>
+                <RadioButton
+                  value="dark"
+                  status={themeMode === 'dark' ? 'checked' : 'unchecked'}
+                  onPress={() => handleThemeChange('dark')}
+                  color={colors.primary}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.themeOption,
+                  { borderColor: colors.border },
+                  themeMode === 'system' && { borderColor: colors.primary, backgroundColor: colors.primarySurface }
+                ]}
+                onPress={() => handleThemeChange('system')}
+              >
+                <MaterialIcons 
+                  name="settings-brightness" 
+                  size={24} 
+                  color={themeMode === 'system' ? colors.primary : colors.textSecondary} 
+                />
+                <Text style={[
+                  styles.themeOptionText,
+                  { color: themeMode === 'system' ? colors.primary : colors.text }
+                ]}>
+                  Automático
+                </Text>
+                <RadioButton
+                  value="system"
+                  status={themeMode === 'system' ? 'checked' : 'unchecked'}
+                  onPress={() => handleThemeChange('system')}
+                  color={colors.primary}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={[styles.themeDescription, { color: colors.textTertiary }]}>
+              {themeMode === 'system' 
+                ? 'O tema será ajustado automaticamente baseado nas configurações do seu dispositivo'
+                : `Tema ${getThemeLabel(themeMode).toLowerCase()} ativo`
+              }
+            </Text>
           </Card.Content>
         </Card>
 
-        {/* Configurações */}
-        <Card style={styles.card}>
+        {/* Configurações Gerais */}
+        <Card style={[styles.card, { backgroundColor: colors.card }]}>
           <Card.Content>
-            <Title style={styles.sectionTitle}>Configurações</Title>
-            
+            <View style={styles.sectionHeader}>
+              <MaterialIcons name="settings" size={24} color={colors.primary} />
+              <Title style={[styles.sectionTitle, { color: colors.text }]}>Configurações</Title>
+            </View>
+
             <List.Item
               title="Notificações"
-              description="Gerenciar alertas e lembretes"
-              left={(props) => <List.Icon {...props} icon="notifications" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => {}}
+              description="Gerenciar notificações do app"
+              left={(props) => <List.Icon {...props} icon="notifications" color={colors.textSecondary} />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" color={colors.textSecondary} />}
+              onPress={() => showSnackbar('Configurações de notificação em desenvolvimento')}
+              titleStyle={{ color: colors.text }}
+              descriptionStyle={{ color: colors.textSecondary }}
             />
-            
-            <Divider />
-            
+
+            <Divider style={{ backgroundColor: colors.divider }} />
+
             <List.Item
               title="Segurança"
-              description="Biometria e autenticação"
-              left={(props) => <List.Icon {...props} icon="security" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => {}}
+              description="Alterar senha e configurações de segurança"
+              left={(props) => <List.Icon {...props} icon="security" color={colors.textSecondary} />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" color={colors.textSecondary} />}
+              onPress={() => showSnackbar('Configurações de segurança em desenvolvimento')}
+              titleStyle={{ color: colors.text }}
+              descriptionStyle={{ color: colors.textSecondary }}
             />
-            
-            <Divider />
-            
+
+            <Divider style={{ backgroundColor: colors.divider }} />
+
             <List.Item
-              title="Tema"
-              description="Aparência do aplicativo"
-              left={(props) => <List.Icon {...props} icon="palette" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => {}}
-            />
-            
-            <Divider />
-            
-            <List.Item
-              title="Backup"
-              description="Sincronização de dados"
-              left={(props) => <List.Icon {...props} icon="cloud-upload" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => {}}
+              title="Exportar Dados"
+              description="Baixar seus dados em formato CSV"
+              left={(props) => <List.Icon {...props} icon="download" color={colors.textSecondary} />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" color={colors.textSecondary} />}
+              onPress={() => showSnackbar('Exportação de dados em desenvolvimento')}
+              titleStyle={{ color: colors.text }}
+              descriptionStyle={{ color: colors.textSecondary }}
             />
           </Card.Content>
         </Card>
 
         {/* Sobre */}
-        <Card style={styles.card}>
+        <Card style={[styles.card, { backgroundColor: colors.card }]}>
           <Card.Content>
-            <Title style={styles.sectionTitle}>Sobre</Title>
-            
+            <View style={styles.sectionHeader}>
+              <MaterialIcons name="info" size={24} color={colors.primary} />
+              <Title style={[styles.sectionTitle, { color: colors.text }]}>Sobre</Title>
+            </View>
+
             <List.Item
-              title="Ajuda"
-              description="Central de ajuda e suporte"
-              left={(props) => <List.Icon {...props} icon="help" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => {}}
+              title="Versão do App"
+              description="1.0.0 (Beta)"
+              left={(props) => <List.Icon {...props} icon="info" color={colors.textSecondary} />}
+              titleStyle={{ color: colors.text }}
+              descriptionStyle={{ color: colors.textSecondary }}
             />
-            
-            <Divider />
-            
+
+            <Divider style={{ backgroundColor: colors.divider }} />
+
             <List.Item
-              title="Versão"
-              description="1.0.0"
-              left={(props) => <List.Icon {...props} icon="info" />}
+              title="Termos de Uso"
+              description="Leia nossos termos e condições"
+              left={(props) => <List.Icon {...props} icon="description" color={colors.textSecondary} />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" color={colors.textSecondary} />}
+              onPress={() => showSnackbar('Termos de uso em desenvolvimento')}
+              titleStyle={{ color: colors.text }}
+              descriptionStyle={{ color: colors.textSecondary }}
+            />
+
+            <Divider style={{ backgroundColor: colors.divider }} />
+
+            <List.Item
+              title="Política de Privacidade"
+              description="Como tratamos seus dados"
+              left={(props) => <List.Icon {...props} icon="privacy-tip" color={colors.textSecondary} />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" color={colors.textSecondary} />}
+              onPress={() => showSnackbar('Política de privacidade em desenvolvimento')}
+              titleStyle={{ color: colors.text }}
+              descriptionStyle={{ color: colors.textSecondary }}
             />
           </Card.Content>
         </Card>
 
-        {/* Sair */}
-        <View style={styles.signOutContainer}>
-          <Button
-            mode="outlined"
-            onPress={handleSignOut}
-            icon="logout"
-            style={styles.signOutButton}
-            textColor="#d32f2f"
-          >
-            Sair da conta
-          </Button>
-        </View>
+        {/* Logout */}
+        <Card style={[styles.card, { backgroundColor: colors.card }]}>
+          <Card.Content>
+            <Button
+              mode="outlined"
+              onPress={handleSignOut}
+              style={[styles.logoutButton, { borderColor: colors.error }]}
+              labelStyle={{ color: colors.error }}
+              icon="logout"
+            >
+              Sair da Conta
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <View style={styles.bottomSpacing} />
       </ScrollView>
+
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={3000}
+        style={{ backgroundColor: colors.surface }}
+      >
+        <Text style={{ color: colors.text }}>{snackbarMessage}</Text>
+      </Snackbar>
     </View>
   );
 }
@@ -128,37 +310,26 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+  },
+  scrollView: {
+    flex: 1,
   },
   header: {
-    padding: 20,
     paddingTop: 60,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 4,
-  },
-  card: {
-    margin: 20,
-    marginTop: 0,
-    elevation: 2,
+    paddingBottom: 30,
+    paddingHorizontal: 20,
   },
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#e8f5e8',
-    justifyContent: 'center',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 16,
   },
   userDetails: {
@@ -167,20 +338,60 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 4,
+    color: '#fff',
   },
   userEmail: {
     fontSize: 14,
-    color: '#666',
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginTop: 2,
+  },
+  card: {
+    marginHorizontal: 20,
+    marginBottom: 16,
+    elevation: 2,
+    borderRadius: 12,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   sectionTitle: {
     fontSize: 18,
-    marginBottom: 8,
+    fontWeight: 'bold',
+    marginLeft: 12,
   },
-  signOutContainer: {
-    padding: 20,
+  sectionDescription: {
+    fontSize: 14,
+    marginBottom: 16,
+    lineHeight: 20,
   },
-  signOutButton: {
-    borderColor: '#d32f2f',
+  themeOptions: {
+    gap: 12,
+    marginBottom: 12,
+  },
+  themeOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderWidth: 1,
+    borderRadius: 8,
+    gap: 12,
+  },
+  themeOptionText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  themeDescription: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    textAlign: 'center',
+  },
+  logoutButton: {
+    marginTop: 8,
+  },
+  bottomSpacing: {
+    height: 20,
   },
 });
