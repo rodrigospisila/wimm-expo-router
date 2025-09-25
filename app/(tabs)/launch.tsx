@@ -193,6 +193,13 @@ export default function LaunchV2Screen() {
     return total / count;
   };
 
+  const formatCurrencyFromNumber = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  };
+
   const handleSubmit = async () => {
     try {
       // Validações
@@ -244,7 +251,7 @@ export default function LaunchV2Screen() {
 
         await transactionService.createInstallment(installmentData);
         
-        Alert.alert('Sucesso', `Parcela criada com ${installmentCount}x de ${formatCurrency(calculateInstallmentValue().toString())}`);
+        Alert.alert('Sucesso', `Parcela criada com ${installmentCount}x de ${formatCurrencyFromNumber(calculateInstallmentValue())}`);
       } else {
         // Criar transação à vista
         await transactionService.createTransaction(transactionData);
@@ -416,7 +423,7 @@ export default function LaunchV2Screen() {
           />
           {paymentForm === 'INSTALLMENT' && amount && (
             <Text style={styles.installmentPreview}>
-              {installmentCount}x de {formatCurrency(calculateInstallmentValue().toString())}
+              {installmentCount}x de {formatCurrencyFromNumber(calculateInstallmentValue())}
             </Text>
           )}
         </View>
