@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
-import { api } from '../../src/services/api';
+import { api, walletService, categoryService, transactionService } from '../../src/services/api';
 import { useAuth } from '../../src/contexts/AuthContext';
 
 interface Category {
@@ -86,15 +86,9 @@ export default function LaunchV2Screen() {
   const loadCategories = useCallback(async () => {
     try {
       setLoadingCategories(true);
-      const token = await getToken();
-      if (!token) return;
-
-      const response = await api.get('/categories', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const categoriesData = await categoryService.getCategories();
       
       // Organizar categorias com subcategorias
-      const categoriesData = response.data;
       const mainCategories = categoriesData.filter((cat: any) => !cat.parentCategoryId);
       const subcategories = categoriesData.filter((cat: any) => cat.parentCategoryId);
       
@@ -110,37 +104,29 @@ export default function LaunchV2Screen() {
     } finally {
       setLoadingCategories(false);
     }
-  }, [getToken]);
+  }, []);
 
   const loadPaymentMethods = useCallback(async () => {
     try {
       setLoadingPaymentMethods(true);
-      const token = await getToken();
-      if (!token) return;
-
-      const [groupsResponse, methodsResponse] = await Promise.all([
-        api.get('/wallets-v2/groups', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        api.get('/wallets-v2/payment-methods', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+      const [groups, allMethods] = await Promise.all([
+        walletService.getGroups(),
+        walletService.getPaymentMethods(),
       ]);
       
-      setWalletGroups(groupsResponse.data);
+      setWalletGroups(groups);
       
       // Separar métodos independentes
-      const allMethods = methodsResponse.data;
       const independent = allMethods.filter((method: PaymentMethod) => !method.walletGroup);
       setIndependentMethods(independent);
-      
+      setPaymentMethods(allMethods);
     } catch (error) {
       console.error('Erro ao carregar métodos de pagamento:', error);
       Alert.alert('Erro', 'Não foi possível carregar os métodos de pagamento');
     } finally {
       setLoadingPaymentMethods(false);
     }
-  }, [getToken]);
+  }, []);
 
   useEffect(() => {
     loadCategories();
@@ -258,16 +244,12 @@ export default function LaunchV2Screen() {
           notes: notes.trim() || null,
         };
 
-        await api.post('/transactions/installments', installmentData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await transactionService.createTransaction(installmentData);
         
         Alert.alert('Sucesso', `Parcela criada com ${installmentCount}x de ${formatCurrency((getNumericAmount() * 100).toString())}`);
       } else {
         // Criar transação à vista
-        await api.post('/transactions', transactionData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await transactionService.createTransaction(transactionData);
         
         Alert.alert('Sucesso', 'Transação criada com sucesso!');
       }
