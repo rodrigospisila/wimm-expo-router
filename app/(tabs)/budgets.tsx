@@ -605,17 +605,23 @@ export default function BudgetsScreen() {
       </Modal>
 
       {/* Modal de Seleção de Categoria */}
-      <Modal visible={showCategoryModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.categoryModalContent, { backgroundColor: colors.background }]}>
-            <View style={[styles.categoryModalHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.categoryModalTitle, { color: colors.text }]}>
-                Selecionar Categoria
+      <Modal 
+        visible={showCategoryModal} 
+        animationType="slide" 
+        presentationStyle="pageSheet"
+      >
+        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
+              <Text style={[styles.modalCancel, { color: colors.primary }]}>
+                Cancelar
               </Text>
-              <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              Selecionar Categoria
+            </Text>
+            <View style={{ width: 60 }} />
+          </View>
             
             <FlatList
               data={categories}
@@ -684,7 +690,6 @@ export default function BudgetsScreen() {
               )}
               style={styles.categoryList}
             />
-          </View>
         </View>
       </Modal>
     </View>
@@ -959,31 +964,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     flex: 1,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-    zIndex: 9999,
-    elevation: 9999,
-  },
-  categoryModalContent: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '80%',
-    zIndex: 10000,
-    elevation: 10000,
-  },
-  categoryModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-  },
-  categoryModalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
+
   categoryList: {
     flex: 1,
   },
