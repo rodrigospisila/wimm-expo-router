@@ -263,6 +263,27 @@ export const walletService = {
     return response.data;
   },
 
+  async getAllPaymentMethods(): Promise<Array<{
+    id: number;
+    name: string;
+    type: string;
+    currentBalance: number;
+    creditLimit?: number;
+    availableLimit?: number;
+    isPrimary: boolean;
+    color: string;
+    icon: string;
+    walletGroup: {
+      id: number;
+      name: string;
+      color: string;
+      icon: string;
+    };
+  }>> {
+    const response = await api.get('/wallets-v2/payment-methods');
+    return response.data;
+  },
+
   // Métodos de compatibilidade V1
   async getAll(type?: string): Promise<Wallet[]> {
     const params = type ? { type } : {};

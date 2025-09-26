@@ -463,11 +463,15 @@ const styles = StyleSheet.create({
     color: '#1a1a1a',
   },
   statusChip: {
-    height: 24,
+    height: 28,
+    paddingHorizontal: 8,
+    borderRadius: 14,
   },
   statusChipText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#fff',
+    fontWeight: '600',
+    lineHeight: 14,
   },
   billInfo: {
     flexDirection: 'row',

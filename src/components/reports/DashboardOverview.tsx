@@ -192,10 +192,10 @@ export default function DashboardOverview({ dateRange, refreshing }: DashboardOv
       </View>
 
       {/* Top Categorias */}
-      {data.topCategories.length > 0 && (
+      {(data.topCategories || []).length > 0 && (
         <View style={styles.topCategoriesContainer}>
           <Text style={styles.sectionTitle}>Principais Categorias</Text>
-          {data.topCategories.map((category) => (
+          {(data.topCategories || []).map((category) => (
             <View key={category.id} style={styles.categoryItem}>
               <View style={styles.categoryInfo}>
                 <View style={[styles.categoryIcon, { backgroundColor: category.color }]}>
@@ -203,7 +203,7 @@ export default function DashboardOverview({ dateRange, refreshing }: DashboardOv
                 </View>
                 <View style={styles.categoryDetails}>
                   <Text style={styles.categoryName}>{category.name}</Text>
-                  <Text style={styles.categoryPercentage}>{category.percentage.toFixed(1)}%</Text>
+                  <Text style={styles.categoryPercentage}>{(category.percentage || 0).toFixed(1)}%</Text>
                 </View>
               </View>
               <Text style={styles.categoryAmount}>{formatCurrency(category.amount)}</Text>
