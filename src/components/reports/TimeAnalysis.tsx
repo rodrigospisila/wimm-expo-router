@@ -74,8 +74,19 @@ export default function TimeAnalysis({ dateRange, refreshing }: TimeAnalysisProp
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      setTimeData(response.data.periods);
-      setSummary(response.data.summary);
+      // Verificações de segurança para evitar erros
+      const periodsData = response.data?.periods || response.data || [];
+      const summaryData = response.data?.summary || {};
+      
+      setTimeData(Array.isArray(periodsData) ? periodsData : []);
+      setSummary({
+        totalIncome: summaryData.totalIncome || 0,
+        totalExpenses: summaryData.totalExpenses || 0,
+        totalBalance: summaryData.totalBalance || 0,
+        averageDaily: summaryData.averageDaily || 0,
+        bestDay: summaryData.bestDay || null,
+        worstDay: summaryData.worstDay || null,
+      });
     } catch (error: any) {
       console.error('Erro ao carregar análise temporal:', error);
       if (error.response?.status === 401) {
@@ -90,10 +101,12 @@ export default function TimeAnalysis({ dateRange, refreshing }: TimeAnalysisProp
   };
 
   const formatCurrency = (value: number) => {
+    // Verificação de segurança para evitar NaN
+    const safeValue = typeof value === 'number' && !isNaN(value) ? value : 0;
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
-    }).format(value);
+    }).format(safeValue);
   };
 
   const formatPeriod = (period: string, date: string) => {
@@ -111,7 +124,13 @@ export default function TimeAnalysis({ dateRange, refreshing }: TimeAnalysisProp
   };
 
   const getMaxValue = () => {
-    const values = timeData.flatMap(item => [Math.abs(item.income), Math.abs(item.expenses)]);
+    if (!timeData || timeData.length === 0) return 1;
+    
+    const values = timeData.flatMap(item => [
+      Math.abs(item?.income || 0), 
+      Math.abs(item?.expenses || 0)
+    ]).filter(val => !isNaN(val));
+    
     return Math.max(...values, 1);
   };
 
@@ -126,8 +145,12 @@ export default function TimeAnalysis({ dateRange, refreshing }: TimeAnalysisProp
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chartContainer}>
         <View style={styles.chart}>
           {timeData.map((item, index) => {
-            const incomeHeight = (Math.abs(item.income) / maxValue) * 120;
-            const expenseHeight = (Math.abs(item.expenses) / maxValue) * 120;
+            // Verificações de segurança para evitar NaN
+            const safeIncome = typeof item?.income === 'number' && !isNaN(item.income) ? item.income : 0;
+            const safeExpenses = typeof item?.expenses === 'number' && !isNaN(item.expenses) ? item.expenses : 0;
+            
+            const incomeHeight = Math.max(2, (Math.abs(safeIncome) / maxValue) * 120);
+            const expenseHeight = Math.max(2, (Math.abs(safeExpenses) / maxValue) * 120);
 
             return (
               <View key={index} style={[styles.chartBar, { width: barWidth }]}>
@@ -136,7 +159,7 @@ export default function TimeAnalysis({ dateRange, refreshing }: TimeAnalysisProp
                   <View style={[styles.expenseBar, { height: expenseHeight }]} />
                 </View>
                 <Text style={styles.chartLabel} numberOfLines={1}>
-                  {formatPeriod(item.period, item.date)}
+                  {formatPeriod(item?.period || '', item?.date || '')}
                 </Text>
               </View>
             );
@@ -243,41 +266,53 @@ export default function TimeAnalysis({ dateRange, refreshing }: TimeAnalysisProp
           {/* Detalhes por Período */}
           <View style={styles.detailsContainer}>
             <Text style={styles.sectionTitle}>Detalhes por Período</Text>
-            {timeData.map((item, index) => (
-              <View key={index} style={styles.periodDetailCard}>
-                <View style={styles.periodDetailHeader}>
-                  <Text style={styles.periodDetailTitle}>
-                    {formatPeriod(item.period, item.date)}
-                  </Text>
-                  <Text style={styles.periodDetailTransactions}>
-                    {item.transactionCount} transações
-                  </Text>
+            {timeData.map((item, index) => {
+              // Verificações de segurança para cada item
+              const safeItem = {
+                period: item?.period || '',
+                date: item?.date || '',
+                transactionCount: item?.transactionCount || 0,
+                income: item?.income || 0,
+                expenses: item?.expenses || 0,
+                balance: item?.balance || 0,
+              };
+              
+              return (
+                <View key={index} style={styles.periodDetailCard}>
+                  <View style={styles.periodDetailHeader}>
+                    <Text style={styles.periodDetailTitle}>
+                      {formatPeriod(safeItem.period, safeItem.date)}
+                    </Text>
+                    <Text style={styles.periodDetailTransactions}>
+                      {safeItem.transactionCount} transações
+                    </Text>
+                  </View>
+                  <View style={styles.periodDetailValues}>
+                    <View style={styles.periodDetailValue}>
+                      <Text style={styles.periodDetailLabel}>Receitas</Text>
+                      <Text style={[styles.periodDetailAmount, { color: '#4CAF50' }]}>
+                        {formatCurrency(safeItem.income)}
+                      </Text>
+                    </View>
+                    <View style={styles.periodDetailValue}>
+                      <Text style={styles.periodDetailLabel}>Despesas</Text>
+                      <Text style={[styles.periodDetailAmount, { color: '#F44336' }]}>
+                        {formatCurrency(safeItem.expenses)}
+                      </Text>
+                    </View>
+                    <View style={styles.periodDetailValue}>
+                      <Text style={styles.periodDetailLabel}>Saldo</Text>
+                      <Text style={[
+                        styles.periodDetailAmount,
+                        { color: safeItem.balance >= 0 ? '#4CAF50' : '#F44336' }
+                      ]}>
+                        {formatCurrency(safeItem.balance)}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
-                <View style={styles.periodDetailValues}>
-                  <View style={styles.periodDetailValue}>
-                    <Text style={styles.periodDetailLabel}>Receitas</Text>
-                    <Text style={[styles.periodDetailAmount, { color: '#4CAF50' }]}>
-                      {formatCurrency(item.income)}
-                    </Text>
-                  </View>
-                  <View style={styles.periodDetailValue}>
-                    <Text style={styles.periodDetailLabel}>Despesas</Text>
-                    <Text style={[styles.periodDetailAmount, { color: '#F44336' }]}>
-                      {formatCurrency(item.expenses)}
-                    </Text>
-                  </View>
-                  <View style={styles.periodDetailValue}>
-                    <Text style={styles.periodDetailLabel}>Saldo</Text>
-                    <Text style={[
-                      styles.periodDetailAmount,
-                      { color: item.balance >= 0 ? '#4CAF50' : '#F44336' }
-                    ]}>
-                      {formatCurrency(item.balance)}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            ))}
+              );
+            })}
           </View>
         </ScrollView>
       )}
