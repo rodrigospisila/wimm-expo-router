@@ -244,16 +244,16 @@ export default function DashboardScreen() {
               </TouchableOpacity>
             </View>
             
-            {dashboardData.topCategories.slice(0, 5).map((category) => (
+            {(dashboardData.topCategories || []).slice(0, 5).map((category) => (
               <Card key={category.id} style={styles.categoryCard}>
                 <Card.Content style={styles.categoryContent}>
                   <View style={styles.categoryLeft}>
-                    <View style={[styles.categoryIcon, { backgroundColor: category.color }]}>
-                      <MaterialIcons name={category.icon as any} size={20} color="#fff" />
+                    <View style={[styles.categoryIcon, { backgroundColor: category.color || '#666' }]}>
+                      <MaterialIcons name={(category.icon || 'category') as any} size={20} color="#fff" />
                     </View>
                     <View>
                       <Text style={styles.categoryName}>{category.name}</Text>
-                      <Text style={styles.categoryPercentage}>{category.percentage.toFixed(1)}% do total</Text>
+                      <Text style={styles.categoryPercentage}>{(category.percentage || 0).toFixed(1)}% do total</Text>
                     </View>
                   </View>
                   <Text style={styles.categoryAmount}>
@@ -275,17 +275,17 @@ export default function DashboardScreen() {
           </View>
           
           {dashboardData?.recentTransactions && dashboardData.recentTransactions.length > 0 ? (
-            dashboardData.recentTransactions.slice(0, 5).map((transaction) => (
+            (dashboardData.recentTransactions || []).slice(0, 5).map((transaction) => (
               <Card key={transaction.id} style={styles.transactionCard}>
                 <Card.Content style={styles.transactionContent}>
                   <View style={styles.transactionLeft}>
-                    <View style={[styles.transactionIcon, { backgroundColor: transaction.category.color }]}>
-                      <MaterialIcons name={transaction.category.icon as any} size={20} color="#fff" />
+                    <View style={[styles.transactionIcon, { backgroundColor: transaction.category?.color || '#666' }]}>
+                      <MaterialIcons name={(transaction.category?.icon || 'receipt') as any} size={20} color="#fff" />
                     </View>
                     <View>
                       <Text style={styles.transactionDescription}>{transaction.description}</Text>
                       <Text style={styles.transactionCategory}>
-                        {transaction.category.name} • {formatDate(transaction.date)}
+                        {transaction.category?.name || 'Categoria'} • {formatDate(transaction.date)}
                       </Text>
                     </View>
                   </View>
@@ -324,7 +324,7 @@ export default function DashboardScreen() {
           <View style={styles.section}>
             <Title style={styles.sectionTitle}>Métodos Mais Usados</Title>
             
-            {dashboardData.paymentMethodsUsage.slice(0, 3).map((method) => (
+            {(dashboardData.paymentMethodsUsage || []).slice(0, 3).map((method) => (
               <Card key={method.id} style={styles.paymentMethodCard}>
                 <Card.Content style={styles.paymentMethodContent}>
                   <View style={styles.paymentMethodLeft}>
@@ -336,7 +336,7 @@ export default function DashboardScreen() {
                       {formatCurrency(Math.abs(method.amount))}
                     </Text>
                     <Text style={styles.paymentMethodPercentage}>
-                      {method.percentage.toFixed(1)}%
+                      {(method.percentage || 0).toFixed(1)}%
                     </Text>
                   </View>
                 </Card.Content>
