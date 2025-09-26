@@ -15,6 +15,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
 import { budgetService, categoryService } from '../../src/services/api';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 
 interface Budget {
   id: number;
@@ -55,6 +57,9 @@ interface BudgetSummary {
 
 export default function BudgetsScreen() {
   const { colors } = useTheme();
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [summary, setSummary] = useState<BudgetSummary | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -70,12 +75,36 @@ export default function BudgetsScreen() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<Category | null>(null);
   const [monthlyLimit, setMonthlyLimit] = useState('');
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     loadData();
   }, []);
+
+  // Capturar dados da categoria selecionada quando retornar da tela de seleção
+  useFocusEffect(
+    useCallback(() => {
+      if (params.categoryId && params.categoryName) {
+        const category: Category = {
+          id: Number(params.categoryId),
+          name: String(params.categoryName),
+          icon: String(params.categoryIcon || 'wallet'),
+          color: String(params.categoryColor || '#666'),
+          type: 'EXPENSE'
+        };
+        
+        setSelectedCategory(category);
+        setSelectedSubcategory(null);
+        
+        // Limpar os parâmetros da rota para evitar reprocessamento
+        router.setParams({
+          categoryId: undefined,
+          categoryName: undefined,
+          categoryIcon: undefined,
+          categoryColor: undefined
+        });
+      }
+    }, [params])
+  );
 
   const loadData = async () => {
     try {
@@ -141,20 +170,13 @@ export default function BudgetsScreen() {
     setRefreshing(false);
   };
 
-  const toggleCategoryExpansion = (categoryId: number) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
-    } else {
-      newExpanded.add(categoryId);
-    }
-    setExpandedCategories(newExpanded);
-  };
-
-  const selectCategory = (category: Category, subcategory?: Category) => {
-    setSelectedCategory(category);
-    setSelectedSubcategory(subcategory || null);
-    setShowCategoryModal(false);
+  const handleCategorySelection = () => {
+    router.push({
+      pathname: '/category-select',
+      params: {
+        returnTo: '/(tabs)/budgets'
+      }
+    });
   };
 
   const formatCurrency = (value: number): string => {
@@ -190,8 +212,8 @@ export default function BudgetsScreen() {
 
     try {
       await budgetService.createBudget({
-        categoryId: selectedSubcategory ? selectedSubcategory.id : selectedCategory.id,
-        subcategoryId: selectedSubcategory ? selectedSubcategory.id : undefined,
+        categoryId: selectedCategory.id,
+        subcategoryId: undefined,
         monthlyLimit: parseFloat(monthlyLimit),
         month: currentMonth,
         year: currentYear,
@@ -496,7 +518,7 @@ export default function BudgetsScreen() {
                     borderColor: colors.border,
                   }
                 ]}
-                onPress={() => setShowCategoryModal(true)}
+                onPress={handleCategorySelection}
               >
                 {selectedCategory ? (
                   <View style={styles.selectedCategoryContent}>
@@ -511,11 +533,6 @@ export default function BudgetsScreen() {
                       <Text style={[styles.selectedCategoryName, { color: colors.text }]}>
                         {selectedCategory.name}
                       </Text>
-                      {selectedSubcategory && (
-                        <Text style={[styles.selectedSubcategoryName, { color: colors.textSecondary }]}>
-                          {selectedSubcategory.name}
-                        </Text>
-                      )}
                     </View>
                   </View>
                 ) : (
@@ -604,94 +621,7 @@ export default function BudgetsScreen() {
         </View>
       </Modal>
 
-      {/* Modal de Seleção de Categoria */}
-      <Modal 
-        visible={showCategoryModal} 
-        animationType="slide" 
-        presentationStyle="pageSheet"
-      >
-        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
-          <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
-              <Text style={[styles.modalCancel, { color: colors.primary }]}>
-                Cancelar
-              </Text>
-            </TouchableOpacity>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>
-              Selecionar Categoria
-            </Text>
-            <View style={{ width: 60 }} />
-          </View>
-            
-            <FlatList
-              data={categories}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item: category }) => (
-                <View>
-                  <TouchableOpacity
-                    style={[styles.categoryItem, { backgroundColor: colors.background }]}
-                    onPress={() => {
-                      if ((category.subCategories || []).length > 0) {
-                        toggleCategoryExpansion(category.id);
-                      } else {
-                        selectCategory(category);
-                      }
-                    }}
-                  >
-                    <View style={styles.categoryItemContent}>
-                      <View style={[styles.categoryIcon, { backgroundColor: category.color }]}>
-                        <Ionicons name={category.icon as any} size={16} color="white" />
-                      </View>
-                      <Text style={[styles.categoryItemName, { color: colors.text }]}>
-                        {category.name}
-                      </Text>
-                      {(category.subCategories || []).length > 0 && (
-                        <Text style={[styles.subcategoryCount, { color: colors.textSecondary }]}>
-                          {category.subCategories?.length} subcategorias
-                        </Text>
-                      )}
-                    </View>
-                    {(category.subCategories || []).length > 0 && (
-                      <Ionicons
-                        name={expandedCategories.has(category.id) ? 'chevron-up' : 'chevron-down'}
-                        size={20}
-                        color={colors.textSecondary}
-                      />
-                    )}
-                  </TouchableOpacity>
-                  
-                  {expandedCategories.has(category.id) && (
-                    <View style={[styles.subcategoriesContainer, { backgroundColor: colors.surface }]}>
-                      <TouchableOpacity
-                        style={[styles.subcategoryItem, { backgroundColor: colors.surface }]}
-                        onPress={() => selectCategory(category)}
-                      >
-                        <Text style={[styles.subcategoryItemName, { color: colors.text }]}>
-                          {category.name} (categoria principal)
-                        </Text>
-                      </TouchableOpacity>
-                      {(category.subCategories || []).map((subcategory) => (
-                        <TouchableOpacity
-                          key={subcategory.id}
-                          style={[styles.subcategoryItem, { backgroundColor: colors.surface }]}
-                          onPress={() => selectCategory(category, subcategory)}
-                        >
-                          <View style={[styles.subcategoryIcon, { backgroundColor: subcategory.color }]}>
-                            <Ionicons name={subcategory.icon as any} size={12} color="white" />
-                          </View>
-                          <Text style={[styles.subcategoryItemName, { color: colors.text }]}>
-                            {subcategory.name}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  )}
-                </View>
-              )}
-              style={styles.categoryList}
-            />
-        </View>
-      </Modal>
+
     </View>
   );
 }
@@ -962,61 +892,6 @@ const styles = StyleSheet.create({
   },
   categorySelectorPlaceholder: {
     fontSize: 16,
-    flex: 1,
-  },
-
-  categoryList: {
-    flex: 1,
-  },
-  categoryItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  categoryItemContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  categoryIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  categoryItemName: {
-    fontSize: 16,
-    fontWeight: '500',
-    flex: 1,
-  },
-  subcategoryCount: {
-    fontSize: 12,
-    marginLeft: 8,
-  },
-  subcategoriesContainer: {
-    paddingLeft: 16,
-  },
-  subcategoryItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    paddingLeft: 44,
-  },
-  subcategoryIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  subcategoryItemName: {
-    fontSize: 14,
     flex: 1,
   },
 });
