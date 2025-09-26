@@ -120,6 +120,13 @@ function RootLayoutNav() {
                   presentation: 'card'
                 }} 
               />
+              <Stack.Screen 
+                name="create-budget" 
+                options={{ 
+                  headerShown: false,
+                  presentation: 'card'
+                }} 
+              />
               <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
             </Stack>
           </ThemeProvider>

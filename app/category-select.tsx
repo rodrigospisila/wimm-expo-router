@@ -136,13 +136,7 @@ export default function CategorySelectScreen() {
           <View>
             <TouchableOpacity
               style={[styles.categoryItem, { borderBottomColor: colors.border }]}
-              onPress={() => {
-                if ((category.subCategories || []).length > 0) {
-                  toggleCategoryExpansion(category.id);
-                } else {
-                  handleSelectCategory(category);
-                }
-              }}
+              onPress={() => handleSelectCategory(category)}
             >
               <View style={styles.categoryMain}>
                 <View
@@ -163,7 +157,10 @@ export default function CategorySelectScreen() {
               </View>
 
               {(category.subCategories || []).length > 0 && (
-                <View style={styles.categoryRight}>
+                <TouchableOpacity 
+                  style={styles.categoryRight}
+                  onPress={() => toggleCategoryExpansion(category.id)}
+                >
                   <Text style={[styles.subcategoryCount, { color: colors.textSecondary }]}>
                     {(category.subCategories || []).length} subcategorias
                   </Text>
@@ -172,7 +169,7 @@ export default function CategorySelectScreen() {
                     size={20}
                     color={colors.textSecondary}
                   />
-                </View>
+                </TouchableOpacity>
               )}
             </TouchableOpacity>
 

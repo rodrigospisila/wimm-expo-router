@@ -65,54 +65,19 @@ export default function BudgetsScreen() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
   const [currentMonth] = useState(new Date().getMonth() + 1);
   const [currentYear] = useState(new Date().getFullYear());
 
-  // Estados do formulário
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<Category | null>(null);
-  const [monthlyLimit, setMonthlyLimit] = useState('');
+
 
   useEffect(() => {
     loadData();
   }, []);
 
-  // Capturar dados da categoria selecionada quando retornar da tela de seleção
-  useFocusEffect(
-    useCallback(() => {
-      if (params.categoryId && params.categoryName) {
-        const category: Category = {
-          id: Number(params.categoryId),
-          name: String(params.categoryName),
-          icon: String(params.categoryIcon || 'wallet'),
-          color: String(params.categoryColor || '#666'),
-          type: 'EXPENSE'
-        };
-        
-        setSelectedCategory(category);
-        setSelectedSubcategory(null);
-        
-        // Se veio da tela de seleção de categoria, reabrir o modal
-        if (params.reopenModal === 'true') {
-          setTimeout(() => {
-            setShowCreateModal(true);
-          }, 200);
-        }
-        
-        // Limpar os parâmetros da rota para evitar reprocessamento
-        router.setParams({
-          categoryId: undefined,
-          categoryName: undefined,
-          categoryIcon: undefined,
-          categoryColor: undefined,
-          reopenModal: undefined
-        });
-      }
-    }, [params])
-  );
+
 
   const loadData = async () => {
     try {
@@ -178,21 +143,7 @@ export default function BudgetsScreen() {
     setRefreshing(false);
   };
 
-  const handleCategorySelection = () => {
-    // Fechar o modal antes de navegar
-    setShowCreateModal(false);
-    
-    // Aguardar um pequeno delay para garantir que o modal foi fechado
-    setTimeout(() => {
-      router.push({
-        pathname: '/category-select',
-        params: {
-          returnTo: '/(tabs)/budgets',
-          reopenModal: 'true' // Indicar que deve reabrir o modal ao retornar
-        }
-      });
-    }, 100);
-  };
+
 
   const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('pt-BR', {
@@ -219,32 +170,7 @@ export default function BudgetsScreen() {
     }
   };
 
-  const handleCreateBudget = async () => {
-    if (!selectedCategory || !monthlyLimit) {
-      Alert.alert('Erro', 'Preencha todos os campos obrigatórios');
-      return;
-    }
 
-    try {
-      await budgetService.createBudget({
-        categoryId: selectedCategory.id,
-        subcategoryId: undefined,
-        monthlyLimit: parseFloat(monthlyLimit),
-        month: currentMonth,
-        year: currentYear,
-      });
-
-      setShowCreateModal(false);
-      setSelectedCategory(null);
-      setSelectedSubcategory(null);
-      setMonthlyLimit('');
-      await loadData();
-      Alert.alert('Sucesso', 'Orçamento criado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao criar orçamento:', error);
-      Alert.alert('Erro', 'Não foi possível criar o orçamento');
-    }
-  };
 
   const handleEditBudget = async () => {
     if (!selectedBudget || !monthlyLimit) {
@@ -400,7 +326,7 @@ export default function BudgetsScreen() {
             </Text>
             <TouchableOpacity
               style={[styles.addButton, { backgroundColor: colors.primary }]}
-              onPress={() => setShowCreateModal(true)}
+              onPress={() => router.push('/create-budget')}
             >
               <Ionicons name="add" size={20} color="white" />
             </TouchableOpacity>
@@ -417,7 +343,7 @@ export default function BudgetsScreen() {
               </Text>
               <TouchableOpacity
                 style={[styles.createFirstButton, { backgroundColor: colors.primary }]}
-                onPress={() => setShowCreateModal(true)}
+                onPress={() => router.push('/create-budget')}
               >
                 <Text style={styles.createFirstButtonText}>Criar Orçamento</Text>
               </TouchableOpacity>
@@ -498,90 +424,7 @@ export default function BudgetsScreen() {
       </ScrollView>
 
       {/* Modal de Criação */}
-      <Modal
-        visible={showCreateModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
-          <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setShowCreateModal(false)}>
-              <Text style={[styles.modalCancel, { color: colors.primary }]}>
-                Cancelar
-              </Text>
-            </TouchableOpacity>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>
-              Novo Orçamento
-            </Text>
-            <TouchableOpacity onPress={handleCreateBudget}>
-              <Text style={[styles.modalSave, { color: colors.primary }]}>
-                Salvar
-              </Text>
-            </TouchableOpacity>
-          </View>
 
-          <ScrollView style={styles.modalContent}>
-            <View style={styles.formGroup}>
-              <Text style={[styles.formLabel, { color: colors.text }]}>
-                Categoria *
-              </Text>
-              <TouchableOpacity
-                style={[
-                  styles.categorySelector,
-                  {
-                    backgroundColor: colors.surface,
-                    borderColor: colors.border,
-                  }
-                ]}
-                onPress={handleCategorySelection}
-              >
-                {selectedCategory ? (
-                  <View style={styles.selectedCategoryContent}>
-                    <View style={[styles.selectedCategoryIcon, { backgroundColor: selectedCategory.color }]}>
-                      <Ionicons
-                        name={selectedCategory.icon as any}
-                        size={16}
-                        color="white"
-                      />
-                    </View>
-                    <View style={styles.selectedCategoryText}>
-                      <Text style={[styles.selectedCategoryName, { color: colors.text }]}>
-                        {selectedCategory.name}
-                      </Text>
-                    </View>
-                  </View>
-                ) : (
-                  <Text style={[styles.categorySelectorPlaceholder, { color: colors.textSecondary }]}>
-                    Selecionar categoria
-                  </Text>
-                )}
-                <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={[styles.formLabel, { color: colors.text }]}>
-                Limite Mensal *
-              </Text>
-              <TextInput
-                style={[
-                  styles.formInput,
-                  {
-                    backgroundColor: colors.surface,
-                    borderColor: colors.border,
-                    color: colors.text,
-                  }
-                ]}
-                value={monthlyLimit}
-                onChangeText={setMonthlyLimit}
-                placeholder="Ex: 500.00"
-                placeholderTextColor={colors.textSecondary}
-                keyboardType="numeric"
-              />
-            </View>
-          </ScrollView>
-        </View>
-      </Modal>
 
       {/* Modal de Edição */}
       <Modal
