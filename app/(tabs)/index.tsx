@@ -12,6 +12,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { walletService, reportsService } from '../../src/services/api';
 import { useRouter } from 'expo-router';
+import { groupTransactionsByInstallment, calculateInstallmentStats } from '../../src/utils/installmentUtils';
+import InstallmentCard from '../../src/components/InstallmentCard';
 
 const { width } = Dimensions.get('window');
 
@@ -41,10 +43,25 @@ interface DashboardData {
     type: 'INCOME' | 'EXPENSE';
     date: string;
     category: {
+      id: number;
       name: string;
       color: string;
       icon: string;
+      type: string;
     };
+    paymentMethod: {
+      id: number;
+      name: string;
+      type: string;
+      color: string;
+    };
+    installment?: {
+      id: number;
+      installmentCount: number;
+      currentInstallment: number;
+    };
+    installmentId?: number;
+    installmentNumber?: number;
   }>;
   paymentMethodsUsage: Array<{
     id: number;
@@ -75,6 +92,7 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [expandedInstallments, setExpandedInstallments] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if (user) {
@@ -150,6 +168,18 @@ export default function DashboardScreen() {
     if (balance > 0) return '#2e7d32'; // Verde
     if (balance < 0) return '#d32f2f'; // Vermelho
     return '#666'; // Neutro
+  }
+
+  function toggleInstallmentExpansion(installmentId: number) {
+    setExpandedInstallments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(installmentId)) {
+        newSet.delete(installmentId);
+      } else {
+        newSet.add(installmentId);
+      }
+      return newSet;
+    });
   }
 
   return (
@@ -275,31 +305,57 @@ export default function DashboardScreen() {
           </View>
           
           {dashboardData?.recentTransactions && dashboardData.recentTransactions.length > 0 ? (
-            (dashboardData.recentTransactions || []).slice(0, 5).map((transaction) => (
-              <Card key={transaction.id} style={styles.transactionCard}>
-                <Card.Content style={styles.transactionContent}>
-                  <View style={styles.transactionLeft}>
-                    <View style={[styles.transactionIcon, { backgroundColor: transaction.category?.color || '#666' }]}>
-                      <MaterialIcons name={(transaction.category?.icon || 'receipt') as any} size={20} color="#fff" />
-                    </View>
-                    <View>
-                      <Text style={styles.transactionDescription}>{transaction.description}</Text>
-                      <Text style={styles.transactionCategory}>
-                        {transaction.category?.name || 'Categoria'} • {formatDate(transaction.date)}
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.transactionRight}>
-                    <Text style={[
-                      styles.transactionAmount,
-                      { color: transaction.type === 'INCOME' ? '#2e7d32' : '#d32f2f' }
-                    ]}>
-                      {transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
-                    </Text>
-                  </View>
-                </Card.Content>
-              </Card>
-            ))
+            (() => {
+              const { installmentGroups, regularTransactions } = groupTransactionsByInstallment(
+                dashboardData.recentTransactions.slice(0, 5)
+              );
+              
+              const mixedItems = [
+                ...installmentGroups.map(group => ({ type: 'installment' as const, data: group })),
+                ...regularTransactions.map(transaction => ({ type: 'transaction' as const, data: transaction }))
+              ].slice(0, 5);
+
+              return mixedItems.map((item) => {
+                if (item.type === 'installment') {
+                  return (
+                    <InstallmentCard
+                      key={`installment-${item.data.installmentId}`}
+                      group={item.data}
+                      onPress={() => showSnackbar('Detalhes da parcela em desenvolvimento')}
+                      onExpand={() => toggleInstallmentExpansion(item.data.installmentId)}
+                      isExpanded={expandedInstallments.has(item.data.installmentId)}
+                    />
+                  );
+                } else {
+                  const transaction = item.data;
+                  return (
+                    <Card key={transaction.id} style={styles.transactionCard}>
+                      <Card.Content style={styles.transactionContent}>
+                        <View style={styles.transactionLeft}>
+                          <View style={[styles.transactionIcon, { backgroundColor: transaction.category?.color || '#666' }]}>
+                            <MaterialIcons name={(transaction.category?.icon || 'receipt') as any} size={20} color="#fff" />
+                          </View>
+                          <View>
+                            <Text style={styles.transactionDescription}>{transaction.description}</Text>
+                            <Text style={styles.transactionCategory}>
+                              {transaction.category?.name || 'Categoria'} • {formatDate(transaction.date)}
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={styles.transactionRight}>
+                          <Text style={[
+                            styles.transactionAmount,
+                            { color: transaction.type === 'INCOME' ? '#2e7d32' : '#d32f2f' }
+                          ]}>
+                            {transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
+                          </Text>
+                        </View>
+                      </Card.Content>
+                    </Card>
+                  );
+                }
+              });
+            })()
           ) : (
             <Card style={styles.emptyCard}>
               <Card.Content style={styles.emptyContent}>

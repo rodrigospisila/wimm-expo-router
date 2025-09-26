@@ -11,6 +11,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
+import { groupTransactionsByInstallment } from '../../utils/installmentUtils';
+import InstallmentCard from '../InstallmentCard';
 
 interface DashboardData {
   totalBalance: number;
@@ -36,10 +38,25 @@ interface DashboardData {
     type: 'INCOME' | 'EXPENSE';
     date: string;
     category: {
+      id: number;
       name: string;
       color: string;
       icon: string;
+      type: string;
     };
+    paymentMethod: {
+      id: number;
+      name: string;
+      type: string;
+      color: string;
+    };
+    installment?: {
+      id: number;
+      installmentCount: number;
+      currentInstallment: number;
+    };
+    installmentId?: number;
+    installmentNumber?: number;
   }>;
 }
 
@@ -58,6 +75,7 @@ export default function DashboardOverview({ dateRange, refreshing }: DashboardOv
   const { getToken, signOut } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [expandedInstallments, setExpandedInstallments] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     loadDashboardData();
@@ -107,6 +125,18 @@ export default function DashboardOverview({ dateRange, refreshing }: DashboardOv
     return new Date(dateString).toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
+    });
+  };
+
+  const toggleInstallmentExpansion = (installmentId: number) => {
+    setExpandedInstallments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(installmentId)) {
+        newSet.delete(installmentId);
+      } else {
+        newSet.add(installmentId);
+      }
+      return newSet;
     });
   };
 
@@ -216,27 +246,53 @@ export default function DashboardOverview({ dateRange, refreshing }: DashboardOv
       {data.recentTransactions.length > 0 && (
         <View style={styles.recentTransactionsContainer}>
           <Text style={styles.sectionTitle}>Transações Recentes</Text>
-          {data.recentTransactions.slice(0, 5).map((transaction) => (
-            <View key={transaction.id} style={styles.transactionItem}>
-              <View style={styles.transactionInfo}>
-                <View style={[styles.transactionIcon, { backgroundColor: transaction.category.color }]}>
-                  <Ionicons name={transaction.category.icon as any} size={16} color="white" />
-                </View>
-                <View style={styles.transactionDetails}>
-                  <Text style={styles.transactionDescription}>{transaction.description}</Text>
-                  <Text style={styles.transactionCategory}>
-                    {transaction.category.name} • {formatDate(transaction.date)}
-                  </Text>
-                </View>
-              </View>
-              <Text style={[
-                styles.transactionAmount,
-                { color: transaction.type === 'INCOME' ? '#4CAF50' : '#F44336' }
-              ]}>
-                {transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
-              </Text>
-            </View>
-          ))}
+          {(() => {
+            const { installmentGroups, regularTransactions } = groupTransactionsByInstallment(
+              data.recentTransactions.slice(0, 5)
+            );
+            
+            const mixedItems = [
+              ...installmentGroups.map(group => ({ type: 'installment' as const, data: group })),
+              ...regularTransactions.map(transaction => ({ type: 'transaction' as const, data: transaction }))
+            ].slice(0, 5);
+
+            return mixedItems.map((item) => {
+              if (item.type === 'installment') {
+                return (
+                  <InstallmentCard
+                    key={`installment-${item.data.installmentId}`}
+                    group={item.data}
+                    onPress={() => {}}
+                    onExpand={() => toggleInstallmentExpansion(item.data.installmentId)}
+                    isExpanded={expandedInstallments.has(item.data.installmentId)}
+                  />
+                );
+              } else {
+                const transaction = item.data;
+                return (
+                  <View key={transaction.id} style={styles.transactionItem}>
+                    <View style={styles.transactionInfo}>
+                      <View style={[styles.transactionIcon, { backgroundColor: transaction.category.color }]}>
+                        <Ionicons name={transaction.category.icon as any} size={16} color="white" />
+                      </View>
+                      <View style={styles.transactionDetails}>
+                        <Text style={styles.transactionDescription}>{transaction.description}</Text>
+                        <Text style={styles.transactionCategory}>
+                          {transaction.category.name} • {formatDate(transaction.date)}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={[
+                      styles.transactionAmount,
+                      { color: transaction.type === 'INCOME' ? '#4CAF50' : '#F44336' }
+                    ]}>
+                      {transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
+                    </Text>
+                  </View>
+                );
+              }
+            });
+          })()}
         </View>
       )}
     </View>

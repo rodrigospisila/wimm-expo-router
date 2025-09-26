@@ -74,7 +74,9 @@ export default function CategoryReport({ dateRange, refreshing }: CategoryReport
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      setCategories(response.data);
+      // Verificação de segurança para garantir que response.data seja um array
+      const categoriesData = response.data?.categories || response.data || [];
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
     } catch (error: any) {
       console.error('Erro ao carregar relatório de categorias:', error);
       if (error.response?.status === 401) {
