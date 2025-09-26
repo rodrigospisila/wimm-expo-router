@@ -52,7 +52,7 @@ interface BudgetSummary {
 }
 
 export default function BudgetsScreen() {
-  const { theme } = useTheme();
+  const { colors } = useTheme();
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [summary, setSummary] = useState<BudgetSummary | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -138,7 +138,7 @@ export default function BudgetsScreen() {
       case 'ON_TRACK': return '#4CAF50';
       case 'WARNING': return '#FF9800';
       case 'OVER_BUDGET': return '#F44336';
-      default: return theme.colors.text;
+      default: return colors.text;
     }
   };
 
@@ -230,10 +230,10 @@ export default function BudgetsScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={[styles.loadingText, { color: theme.colors.text }]}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.text }]}>
             Carregando orçamentos...
           </Text>
         </View>
@@ -242,7 +242,7 @@ export default function BudgetsScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         style={styles.scrollView}
         refreshControl={
@@ -251,10 +251,10 @@ export default function BudgetsScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.colors.text }]}>
+          <Text style={[styles.title, { color: colors.text }]}>
             Orçamentos
           </Text>
-          <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             {new Date(currentYear, currentMonth - 1).toLocaleDateString('pt-BR', {
               month: 'long',
               year: 'numeric',
@@ -264,26 +264,26 @@ export default function BudgetsScreen() {
 
         {/* Resumo */}
         {summary && (
-          <View style={[styles.summaryCard, { backgroundColor: theme.colors.surface }]}>
-            <Text style={[styles.summaryTitle, { color: theme.colors.text }]}>
+          <View style={[styles.summaryCard, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.summaryTitle, { color: colors.text }]}>
               Resumo do Mês
             </Text>
             
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
-                <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+                <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
                   Orçamento Total
                 </Text>
-                <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
+                <Text style={[styles.summaryValue, { color: colors.text }]}>
                   {formatCurrency(summary.totalBudget)}
                 </Text>
               </View>
               
               <View style={styles.summaryItem}>
-                <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+                <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
                   Gasto Total
                 </Text>
-                <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
+                <Text style={[styles.summaryValue, { color: colors.text }]}>
                   {formatCurrency(summary.totalSpent)}
                 </Text>
               </View>
@@ -291,7 +291,7 @@ export default function BudgetsScreen() {
 
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
-                <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+                <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
                   Restante
                 </Text>
                 <Text style={[
@@ -303,7 +303,7 @@ export default function BudgetsScreen() {
               </View>
               
               <View style={styles.summaryItem}>
-                <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>
+                <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
                   Status
                 </Text>
                 <View style={styles.statusRow}>
@@ -325,11 +325,11 @@ export default function BudgetsScreen() {
         {/* Lista de Orçamentos */}
         <View style={styles.budgetsSection}>
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
               Orçamentos por Categoria
             </Text>
             <TouchableOpacity
-              style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
+              style={[styles.addButton, { backgroundColor: colors.primary }]}
               onPress={() => setShowCreateModal(true)}
             >
               <Ionicons name="add" size={20} color="white" />
@@ -337,16 +337,16 @@ export default function BudgetsScreen() {
           </View>
 
           {budgets.length === 0 ? (
-            <View style={[styles.emptyState, { backgroundColor: theme.colors.surface }]}>
-              <Ionicons name="wallet-outline" size={48} color={theme.colors.textSecondary} />
-              <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>
+            <View style={[styles.emptyState, { backgroundColor: colors.surface }]}>
+              <Ionicons name="wallet-outline" size={48} color={colors.textSecondary} />
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>
                 Nenhum orçamento criado
               </Text>
-              <Text style={[styles.emptySubtitle, { color: theme.colors.textSecondary }]}>
+              <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
                 Crie seu primeiro orçamento para controlar seus gastos
               </Text>
               <TouchableOpacity
-                style={[styles.createFirstButton, { backgroundColor: theme.colors.primary }]}
+                style={[styles.createFirstButton, { backgroundColor: colors.primary }]}
                 onPress={() => setShowCreateModal(true)}
               >
                 <Text style={styles.createFirstButtonText}>Criar Orçamento</Text>
@@ -354,7 +354,7 @@ export default function BudgetsScreen() {
             </View>
           ) : (
             budgets.map((budget) => (
-              <View key={budget.id} style={[styles.budgetCard, { backgroundColor: theme.colors.surface }]}>
+              <View key={budget.id} style={[styles.budgetCard, { backgroundColor: colors.surface }]}>
                 <View style={styles.budgetHeader}>
                   <View style={styles.categoryInfo}>
                     <View
@@ -370,7 +370,7 @@ export default function BudgetsScreen() {
                       />
                     </View>
                     <View style={styles.categoryText}>
-                      <Text style={[styles.categoryName, { color: theme.colors.text }]}>
+                      <Text style={[styles.categoryName, { color: colors.text }]}>
                         {budget.category.name}
                       </Text>
                       <Text style={[styles.budgetStatus, { color: getStatusColor(budget.status) }]}>
@@ -384,7 +384,7 @@ export default function BudgetsScreen() {
                       style={styles.actionButton}
                       onPress={() => openEditModal(budget)}
                     >
-                      <Ionicons name="pencil" size={16} color={theme.colors.textSecondary} />
+                      <Ionicons name="pencil" size={16} color={colors.textSecondary} />
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.actionButton}
@@ -397,7 +397,7 @@ export default function BudgetsScreen() {
 
                 <View style={styles.budgetProgress}>
                   <View style={styles.progressInfo}>
-                    <Text style={[styles.progressText, { color: theme.colors.textSecondary }]}>
+                    <Text style={[styles.progressText, { color: colors.textSecondary }]}>
                       {formatCurrency(budget.currentSpent)} de {formatCurrency(budget.monthlyLimit)}
                     </Text>
                     <Text style={[styles.progressPercentage, { color: getStatusColor(budget.status) }]}>
@@ -405,7 +405,7 @@ export default function BudgetsScreen() {
                     </Text>
                   </View>
                   
-                  <View style={[styles.progressBar, { backgroundColor: theme.colors.border }]}>
+                  <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
                     <View
                       style={[
                         styles.progressFill,
@@ -417,7 +417,7 @@ export default function BudgetsScreen() {
                     />
                   </View>
                   
-                  <Text style={[styles.remainingText, { color: theme.colors.textSecondary }]}>
+                  <Text style={[styles.remainingText, { color: colors.textSecondary }]}>
                     {budget.remaining >= 0 ? 'Restam' : 'Excedeu'} {formatCurrency(Math.abs(budget.remaining))}
                   </Text>
                 </View>
@@ -433,18 +433,18 @@ export default function BudgetsScreen() {
         animationType="slide"
         presentationStyle="pageSheet"
       >
-        <View style={[styles.modalContainer, { backgroundColor: theme.colors.background }]}>
+        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setShowCreateModal(false)}>
-              <Text style={[styles.modalCancel, { color: theme.colors.primary }]}>
+              <Text style={[styles.modalCancel, { color: colors.primary }]}>
                 Cancelar
               </Text>
             </TouchableOpacity>
-            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
               Novo Orçamento
             </Text>
             <TouchableOpacity onPress={handleCreateBudget}>
-              <Text style={[styles.modalSave, { color: theme.colors.primary }]}>
+              <Text style={[styles.modalSave, { color: colors.primary }]}>
                 Salvar
               </Text>
             </TouchableOpacity>
@@ -452,7 +452,7 @@ export default function BudgetsScreen() {
 
           <ScrollView style={styles.modalContent}>
             <View style={styles.formGroup}>
-              <Text style={[styles.formLabel, { color: theme.colors.text }]}>
+              <Text style={[styles.formLabel, { color: colors.text }]}>
                 Categoria *
               </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -465,10 +465,10 @@ export default function BudgetsScreen() {
                         {
                           backgroundColor: selectedCategoryId === category.id
                             ? category.color + '20'
-                            : theme.colors.surface,
+                            : colors.surface,
                           borderColor: selectedCategoryId === category.id
                             ? category.color
-                            : theme.colors.border,
+                            : colors.border,
                         }
                       ]}
                       onPress={() => setSelectedCategoryId(category.id)}
@@ -480,7 +480,7 @@ export default function BudgetsScreen() {
                       />
                       <Text style={[
                         styles.categoryOptionText,
-                        { color: theme.colors.text }
+                        { color: colors.text }
                       ]}>
                         {category.name}
                       </Text>
@@ -491,22 +491,22 @@ export default function BudgetsScreen() {
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={[styles.formLabel, { color: theme.colors.text }]}>
+              <Text style={[styles.formLabel, { color: colors.text }]}>
                 Limite Mensal *
               </Text>
               <TextInput
                 style={[
                   styles.formInput,
                   {
-                    backgroundColor: theme.colors.surface,
-                    borderColor: theme.colors.border,
-                    color: theme.colors.text,
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                    color: colors.text,
                   }
                 ]}
                 value={monthlyLimit}
                 onChangeText={setMonthlyLimit}
                 placeholder="Ex: 500.00"
-                placeholderTextColor={theme.colors.textSecondary}
+                placeholderTextColor={colors.textSecondary}
                 keyboardType="numeric"
               />
             </View>
@@ -520,18 +520,18 @@ export default function BudgetsScreen() {
         animationType="slide"
         presentationStyle="pageSheet"
       >
-        <View style={[styles.modalContainer, { backgroundColor: theme.colors.background }]}>
+        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setShowEditModal(false)}>
-              <Text style={[styles.modalCancel, { color: theme.colors.primary }]}>
+              <Text style={[styles.modalCancel, { color: colors.primary }]}>
                 Cancelar
               </Text>
             </TouchableOpacity>
-            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
               Editar Orçamento
             </Text>
             <TouchableOpacity onPress={handleEditBudget}>
-              <Text style={[styles.modalSave, { color: theme.colors.primary }]}>
+              <Text style={[styles.modalSave, { color: colors.primary }]}>
                 Salvar
               </Text>
             </TouchableOpacity>
@@ -540,25 +540,25 @@ export default function BudgetsScreen() {
           <View style={styles.modalContent}>
             {selectedBudget && (
               <View style={styles.formGroup}>
-                <Text style={[styles.formLabel, { color: theme.colors.text }]}>
+                <Text style={[styles.formLabel, { color: colors.text }]}>
                   Categoria: {selectedBudget.category.name}
                 </Text>
-                <Text style={[styles.formLabel, { color: theme.colors.text }]}>
+                <Text style={[styles.formLabel, { color: colors.text }]}>
                   Limite Mensal *
                 </Text>
                 <TextInput
                   style={[
                     styles.formInput,
                     {
-                      backgroundColor: theme.colors.surface,
-                      borderColor: theme.colors.border,
-                      color: theme.colors.text,
+                      backgroundColor: colors.surface,
+                      borderColor: colors.border,
+                      color: colors.text,
                     }
                   ]}
                   value={monthlyLimit}
                   onChangeText={setMonthlyLimit}
                   placeholder="Ex: 500.00"
-                  placeholderTextColor={theme.colors.textSecondary}
+                  placeholderTextColor={colors.textSecondary}
                   keyboardType="numeric"
                 />
               </View>
