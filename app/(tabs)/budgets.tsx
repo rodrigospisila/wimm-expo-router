@@ -39,6 +39,7 @@ interface Category {
   color: string;
   icon: string;
   type: string;
+  subCategories?: Category[];
 }
 
 interface BudgetSummary {
@@ -65,8 +66,11 @@ export default function BudgetsScreen() {
   const [currentYear] = useState(new Date().getFullYear());
 
   // Estados do formulário
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<Category | null>(null);
   const [monthlyLimit, setMonthlyLimit] = useState('');
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     loadData();
@@ -109,8 +113,18 @@ export default function BudgetsScreen() {
   const loadCategories = async () => {
     try {
       const data = await categoryService.getCategories();
+      
+      // Organizar categorias com subcategorias
+      const mainCategories = data.filter((cat: any) => !cat.parentCategoryId);
+      const subcategories = data.filter((cat: any) => cat.parentCategoryId);
+      
+      const categoriesWithSubs = mainCategories.map((cat: any) => ({
+        ...cat,
+        subCategories: subcategories.filter((sub: any) => sub.parentCategoryId === cat.id),
+      }));
+      
       // Filtrar apenas categorias de despesa que não têm orçamento
-      const expenseCategories = data.filter(cat => 
+      const expenseCategories = categoriesWithSubs.filter(cat => 
         cat.type === 'EXPENSE' && 
         !budgets.some(budget => budget.category.id === cat.id)
       );
@@ -124,6 +138,22 @@ export default function BudgetsScreen() {
     setRefreshing(true);
     await loadData();
     setRefreshing(false);
+  };
+
+  const toggleCategoryExpansion = (categoryId: number) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(categoryId)) {
+      newExpanded.delete(categoryId);
+    } else {
+      newExpanded.add(categoryId);
+    }
+    setExpandedCategories(newExpanded);
+  };
+
+  const selectCategory = (category: Category, subcategory?: Category) => {
+    setSelectedCategory(category);
+    setSelectedSubcategory(subcategory || null);
+    setShowCategoryModal(false);
   };
 
   const formatCurrency = (value: number): string => {
@@ -152,21 +182,23 @@ export default function BudgetsScreen() {
   };
 
   const handleCreateBudget = async () => {
-    if (!selectedCategoryId || !monthlyLimit) {
+    if (!selectedCategory || !monthlyLimit) {
       Alert.alert('Erro', 'Preencha todos os campos obrigatórios');
       return;
     }
 
     try {
       await budgetService.createBudget({
-        categoryId: selectedCategoryId,
+        categoryId: selectedSubcategory ? selectedSubcategory.id : selectedCategory.id,
+        subcategoryId: selectedSubcategory ? selectedSubcategory.id : undefined,
         monthlyLimit: parseFloat(monthlyLimit),
         month: currentMonth,
         year: currentYear,
       });
 
       setShowCreateModal(false);
-      setSelectedCategoryId(null);
+      setSelectedCategory(null);
+      setSelectedSubcategory(null);
       setMonthlyLimit('');
       await loadData();
       Alert.alert('Sucesso', 'Orçamento criado com sucesso!');
@@ -455,39 +487,43 @@ export default function BudgetsScreen() {
               <Text style={[styles.formLabel, { color: colors.text }]}>
                 Categoria *
               </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.categoriesRow}>
-                  {categories.map((category) => (
-                    <TouchableOpacity
-                      key={category.id}
-                      style={[
-                        styles.categoryOption,
-                        {
-                          backgroundColor: selectedCategoryId === category.id
-                            ? category.color + '20'
-                            : colors.surface,
-                          borderColor: selectedCategoryId === category.id
-                            ? category.color
-                            : colors.border,
-                        }
-                      ]}
-                      onPress={() => setSelectedCategoryId(category.id)}
-                    >
+              <TouchableOpacity
+                style={[
+                  styles.categorySelector,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                  }
+                ]}
+                onPress={() => setShowCategoryModal(true)}
+              >
+                {selectedCategory ? (
+                  <View style={styles.selectedCategoryContent}>
+                    <View style={[styles.selectedCategoryIcon, { backgroundColor: selectedCategory.color }]}>
                       <Ionicons
-                        name={category.icon as any}
-                        size={20}
-                        color={category.color}
+                        name={selectedCategory.icon as any}
+                        size={16}
+                        color="white"
                       />
-                      <Text style={[
-                        styles.categoryOptionText,
-                        { color: colors.text }
-                      ]}>
-                        {category.name}
+                    </View>
+                    <View style={styles.selectedCategoryText}>
+                      <Text style={[styles.selectedCategoryName, { color: colors.text }]}>
+                        {selectedCategory.name}
                       </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
+                      {selectedSubcategory && (
+                        <Text style={[styles.selectedSubcategoryName, { color: colors.textSecondary }]}>
+                          {selectedSubcategory.name}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                ) : (
+                  <Text style={[styles.categorySelectorPlaceholder, { color: colors.textSecondary }]}>
+                    Selecionar categoria
+                  </Text>
+                )}
+                <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
             </View>
 
             <View style={styles.formGroup}>
@@ -563,6 +599,90 @@ export default function BudgetsScreen() {
                 />
               </View>
             )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de Seleção de Categoria */}
+      <Modal visible={showCategoryModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.categoryModalContent, { backgroundColor: colors.background }]}>
+            <View style={[styles.categoryModalHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.categoryModalTitle, { color: colors.text }]}>
+                Selecionar Categoria
+              </Text>
+              <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
+                <Ionicons name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <FlatList
+              data={categories}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item: category }) => (
+                <View>
+                  <TouchableOpacity
+                    style={[styles.categoryItem, { backgroundColor: colors.background }]}
+                    onPress={() => {
+                      if ((category.subCategories || []).length > 0) {
+                        toggleCategoryExpansion(category.id);
+                      } else {
+                        selectCategory(category);
+                      }
+                    }}
+                  >
+                    <View style={styles.categoryItemContent}>
+                      <View style={[styles.categoryIcon, { backgroundColor: category.color }]}>
+                        <Ionicons name={category.icon as any} size={16} color="white" />
+                      </View>
+                      <Text style={[styles.categoryItemName, { color: colors.text }]}>
+                        {category.name}
+                      </Text>
+                      {(category.subCategories || []).length > 0 && (
+                        <Text style={[styles.subcategoryCount, { color: colors.textSecondary }]}>
+                          {category.subCategories?.length} subcategorias
+                        </Text>
+                      )}
+                    </View>
+                    {(category.subCategories || []).length > 0 && (
+                      <Ionicons
+                        name={expandedCategories.has(category.id) ? 'chevron-up' : 'chevron-down'}
+                        size={20}
+                        color={colors.textSecondary}
+                      />
+                    )}
+                  </TouchableOpacity>
+                  
+                  {expandedCategories.has(category.id) && (
+                    <View style={[styles.subcategoriesContainer, { backgroundColor: colors.surface }]}>
+                      <TouchableOpacity
+                        style={[styles.subcategoryItem, { backgroundColor: colors.surface }]}
+                        onPress={() => selectCategory(category)}
+                      >
+                        <Text style={[styles.subcategoryItemName, { color: colors.text }]}>
+                          {category.name} (categoria principal)
+                        </Text>
+                      </TouchableOpacity>
+                      {(category.subCategories || []).map((subcategory) => (
+                        <TouchableOpacity
+                          key={subcategory.id}
+                          style={[styles.subcategoryItem, { backgroundColor: colors.surface }]}
+                          onPress={() => selectCategory(category, subcategory)}
+                        >
+                          <View style={[styles.subcategoryIcon, { backgroundColor: subcategory.color }]}>
+                            <Ionicons name={subcategory.icon as any} size={12} color="white" />
+                          </View>
+                          <Text style={[styles.subcategoryItemName, { color: colors.text }]}>
+                            {subcategory.name}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              )}
+              style={styles.categoryList}
+            />
           </View>
         </View>
       </Modal>
@@ -801,21 +921,116 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
   },
-  categoriesRow: {
+  categorySelector: {
     flexDirection: 'row',
-    gap: 12,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    minHeight: 56,
   },
-  categoryOption: {
+  selectedCategoryContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  selectedCategoryIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  selectedCategoryText: {
+    flex: 1,
+  },
+  selectedCategoryName: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  selectedSubcategoryName: {
+    fontSize: 14,
+    marginTop: 2,
+  },
+  categorySelectorPlaceholder: {
+    fontSize: 16,
+    flex: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  categoryModalContent: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '80%',
+  },
+  categoryModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+  },
+  categoryModalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  categoryList: {
+    flex: 1,
+  },
+  categoryItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  categoryItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  categoryIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  categoryItemName: {
+    fontSize: 16,
+    fontWeight: '500',
+    flex: 1,
+  },
+  subcategoryCount: {
+    fontSize: 12,
+    marginLeft: 8,
+  },
+  subcategoriesContainer: {
+    paddingLeft: 16,
+  },
+  subcategoryItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    gap: 8,
-    minWidth: 120,
+    paddingLeft: 44,
   },
-  categoryOptionText: {
+  subcategoryIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  subcategoryItemName: {
     fontSize: 14,
-    fontWeight: '500',
+    flex: 1,
   },
 });
