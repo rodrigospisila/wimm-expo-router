@@ -70,8 +70,11 @@ export default function InstallmentCard({
   onExpand, 
   isExpanded = false 
 }: InstallmentCardProps) {
-  const progress = group.paidInstallments / group.installmentCount;
-  const remainingInstallments = group.installmentCount - group.paidInstallments;
+  // Verificações de segurança para evitar NaN
+  const paidInstallments = Math.max(0, group.paidInstallments || 0);
+  const installmentCount = Math.max(1, group.installmentCount || 1);
+  const progress = Math.min(1, Math.max(0, paidInstallments / installmentCount));
+  const remainingInstallments = Math.max(0, installmentCount - paidInstallments);
   
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -119,7 +122,7 @@ export default function InstallmentCard({
                 {group.type === 'INCOME' ? '+' : ''}{formatCurrency(group.totalAmount)}
               </Text>
               <Text style={styles.installmentInfo}>
-                Total em {group.installmentCount}x
+                Total em {installmentCount}x
               </Text>
             </View>
           </View>
@@ -128,7 +131,7 @@ export default function InstallmentCard({
           <View style={styles.progressSection}>
             <View style={styles.progressHeader}>
               <Text style={styles.progressLabel}>
-                {group.paidInstallments}/{group.installmentCount} parcelas pagas
+                {paidInstallments}/{installmentCount} parcelas pagas
               </Text>
               <Text style={[styles.progressPercentage, { color: getProgressColor() }]}>
                 {Math.round(progress * 100)}%
@@ -174,18 +177,18 @@ export default function InstallmentCard({
                     <View style={styles.installmentLeft}>
                       <View style={[
                         styles.installmentStatus,
-                        { backgroundColor: transaction.installmentNumber <= group.paidInstallments ? '#2e7d32' : '#e0e0e0' }
+                        { backgroundColor: (transaction.installmentNumber || 0) <= paidInstallments ? '#2e7d32' : '#e0e0e0' }
                       ]}>
                         <Text style={[
                           styles.installmentNumber,
-                          { color: transaction.installmentNumber <= group.paidInstallments ? '#fff' : '#666' }
+                          { color: (transaction.installmentNumber || 0) <= paidInstallments ? '#fff' : '#666' }
                         ]}>
-                          {transaction.installmentNumber}
+                          {transaction.installmentNumber || 0}
                         </Text>
                       </View>
                       <View>
                         <Text style={styles.installmentDescription}>
-                          Parcela {transaction.installmentNumber}/{group.installmentCount}
+                          Parcela {transaction.installmentNumber}/{installmentCount}
                         </Text>
                         <Text style={styles.installmentDate}>
                           {formatDate(transaction.date)}
