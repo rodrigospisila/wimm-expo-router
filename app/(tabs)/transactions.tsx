@@ -24,6 +24,7 @@ import { useAuth } from '../../src/contexts/AuthContext';
 import { transactionService, categoryService, walletService } from '../../src/services/api';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+import InstallmentCard from '../../src/components/InstallmentCard';
 
 interface Transaction {
   id: number;
@@ -55,6 +56,8 @@ interface Transaction {
     installmentCount: number;
     currentInstallment: number;
   };
+  installmentId?: number;
+  installmentNumber?: number;
 }
 
 interface Filters {
@@ -77,6 +80,7 @@ export default function TransactionsScreen() {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [filtersVisible, setFiltersVisible] = useState(false);
+  const [expandedInstallments, setExpandedInstallments] = useState<Set<number>>(new Set());
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
@@ -243,6 +247,55 @@ export default function TransactionsScreen() {
     return method?.name || 'Método';
   }
 
+  // Função para agrupar transações parceladas
+  function groupTransactions() {
+    const installmentGroups = new Map();
+    const regularTransactions: Transaction[] = [];
+
+    transactions.forEach(transaction => {
+      if (transaction.installment && transaction.installmentId) {
+        const installmentId = transaction.installmentId;
+        
+        if (!installmentGroups.has(installmentId)) {
+          installmentGroups.set(installmentId, {
+            installmentId,
+            description: transaction.description,
+            totalAmount: 0,
+            installmentCount: transaction.installment.installmentCount,
+            paidInstallments: transaction.installment.currentInstallment,
+            category: transaction.category,
+            paymentMethod: transaction.paymentMethod,
+            transactions: [],
+            type: transaction.type,
+          });
+        }
+
+        const group = installmentGroups.get(installmentId);
+        group.transactions.push(transaction);
+        group.totalAmount += Math.abs(transaction.amount);
+      } else {
+        regularTransactions.push(transaction);
+      }
+    });
+
+    return {
+      installmentGroups: Array.from(installmentGroups.values()),
+      regularTransactions,
+    };
+  }
+
+  function toggleInstallmentExpansion(installmentId: number) {
+    setExpandedInstallments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(installmentId)) {
+        newSet.delete(installmentId);
+      } else {
+        newSet.add(installmentId);
+      }
+      return newSet;
+    });
+  }
+
   const renderTransaction = ({ item }: { item: Transaction }) => (
     <Card style={styles.transactionCard}>
       <TouchableOpacity onPress={() => showSnackbar('Detalhes da transação em desenvolvimento')}>
@@ -352,9 +405,32 @@ export default function TransactionsScreen() {
 
       {/* Lista de transações */}
       <FlatList
-        data={transactions}
-        renderItem={renderTransaction}
-        keyExtractor={(item) => item.id.toString()}
+        data={(() => {
+          const { installmentGroups, regularTransactions } = groupTransactions();
+          return [
+            ...installmentGroups.map(group => ({ type: 'installment', data: group })),
+            ...regularTransactions.map(transaction => ({ type: 'transaction', data: transaction }))
+          ];
+        })()}
+        renderItem={({ item }) => {
+          if (item.type === 'installment') {
+            return (
+              <InstallmentCard
+                group={item.data}
+                onPress={() => showSnackbar('Detalhes da parcela em desenvolvimento')}
+                onExpand={() => toggleInstallmentExpansion(item.data.installmentId)}
+                isExpanded={expandedInstallments.has(item.data.installmentId)}
+              />
+            );
+          } else {
+            return renderTransaction({ item: item.data });
+          }
+        }}
+        keyExtractor={(item) => 
+          item.type === 'installment' 
+            ? `installment-${item.data.installmentId}` 
+            : `transaction-${item.data.id}`
+        }
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
