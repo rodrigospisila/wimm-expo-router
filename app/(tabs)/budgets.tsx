@@ -963,11 +963,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
+    zIndex: 9999,
+    elevation: 9999,
   },
   categoryModalContent: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '80%',
+    zIndex: 10000,
+    elevation: 10000,
   },
   categoryModalHeader: {
     flexDirection: 'row',
