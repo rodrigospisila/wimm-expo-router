@@ -111,10 +111,28 @@ export default function CategorySelectScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <FlatList
-        data={categories}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item: category }) => (
+      {categories.length === 0 && !loading ? (
+        <View style={[styles.emptyState, { backgroundColor: colors.background }]}>
+          <Ionicons name="folder-open-outline" size={64} color={colors.textSecondary} />
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>
+            Nenhuma categoria encontrada
+          </Text>
+          <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+            Não há categorias de despesa disponíveis para seleção. {'\n'}
+            Verifique se existem categorias cadastradas no sistema.
+          </Text>
+          <TouchableOpacity
+            style={[styles.emptyButton, { backgroundColor: colors.primary }]}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.emptyButtonText}>Voltar</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={categories}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item: category }) => (
           <View>
             <TouchableOpacity
               style={[styles.categoryItem, { borderBottomColor: colors.border }]}
@@ -187,7 +205,8 @@ export default function CategorySelectScreen() {
             )}
           </View>
         )}
-      />
+        />
+      )}
     </View>
   );
 }
@@ -266,5 +285,34 @@ const styles = StyleSheet.create({
   subcategoryName: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 32,
+  },
+  emptyButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  emptyButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

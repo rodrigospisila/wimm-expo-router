@@ -95,12 +95,20 @@ export default function BudgetsScreen() {
         setSelectedCategory(category);
         setSelectedSubcategory(null);
         
+        // Se veio da tela de seleção de categoria, reabrir o modal
+        if (params.reopenModal === 'true') {
+          setTimeout(() => {
+            setShowCreateModal(true);
+          }, 200);
+        }
+        
         // Limpar os parâmetros da rota para evitar reprocessamento
         router.setParams({
           categoryId: undefined,
           categoryName: undefined,
           categoryIcon: undefined,
-          categoryColor: undefined
+          categoryColor: undefined,
+          reopenModal: undefined
         });
       }
     }, [params])
@@ -171,12 +179,19 @@ export default function BudgetsScreen() {
   };
 
   const handleCategorySelection = () => {
-    router.push({
-      pathname: '/category-select',
-      params: {
-        returnTo: '/(tabs)/budgets'
-      }
-    });
+    // Fechar o modal antes de navegar
+    setShowCreateModal(false);
+    
+    // Aguardar um pequeno delay para garantir que o modal foi fechado
+    setTimeout(() => {
+      router.push({
+        pathname: '/category-select',
+        params: {
+          returnTo: '/(tabs)/budgets',
+          reopenModal: 'true' // Indicar que deve reabrir o modal ao retornar
+        }
+      });
+    }, 100);
   };
 
   const formatCurrency = (value: number): string => {
