@@ -111,12 +111,8 @@ export default function CreateBudgetScreen() {
         year: new Date().getFullYear(),
       });
 
-      Alert.alert('Sucesso', 'Orçamento criado com sucesso!', [
-        {
-          text: 'OK',
-          onPress: () => router.back()
-        }
-      ]);
+      // Navegar diretamente para a tela de orçamentos
+      router.replace('/(tabs)/budgets');
     } catch (error) {
       console.error('Erro ao criar orçamento:', error);
       Alert.alert('Erro', 'Não foi possível criar o orçamento. Tente novamente.');
