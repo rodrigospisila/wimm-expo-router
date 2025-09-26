@@ -38,7 +38,7 @@ export default function CategorySelectScreen() {
   const loadCategories = async () => {
     try {
       setLoading(true);
-      const { data } = await categoryService.getAll();
+      const data = await categoryService.getCategories();
       
       // Organizar categorias e subcategorias
       const mainCategories = data.filter((cat: any) => !cat.parentCategoryId);
