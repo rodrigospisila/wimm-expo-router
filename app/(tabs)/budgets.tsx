@@ -10,6 +10,7 @@ import {
   Modal,
   RefreshControl,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
@@ -126,7 +127,7 @@ export default function BudgetsScreen() {
       // Filtrar apenas categorias de despesa que não têm orçamento
       const expenseCategories = categoriesWithSubs.filter(cat => 
         cat.type === 'EXPENSE' && 
-        !budgets.some(budget => budget.category.id === cat.id)
+        !(budgets || []).some(budget => budget?.category?.id === cat.id)
       );
       setCategories(expenseCategories);
     } catch (error) {
@@ -256,7 +257,7 @@ export default function BudgetsScreen() {
 
   const openEditModal = (budget: Budget) => {
     setSelectedBudget(budget);
-    setMonthlyLimit(budget.monthlyLimit.toString());
+    setMonthlyLimit((budget?.monthlyLimit || 0).toString());
     setShowEditModal(true);
   };
 
@@ -368,7 +369,7 @@ export default function BudgetsScreen() {
             </TouchableOpacity>
           </View>
 
-          {budgets.length === 0 ? (
+          {(budgets || []).length === 0 ? (
             <View style={[styles.emptyState, { backgroundColor: colors.surface }]}>
               <Ionicons name="wallet-outline" size={48} color={colors.textSecondary} />
               <Text style={[styles.emptyTitle, { color: colors.text }]}>
@@ -385,28 +386,28 @@ export default function BudgetsScreen() {
               </TouchableOpacity>
             </View>
           ) : (
-            budgets.map((budget) => (
+            (budgets || []).map((budget) => (
               <View key={budget.id} style={[styles.budgetCard, { backgroundColor: colors.surface }]}>
                 <View style={styles.budgetHeader}>
                   <View style={styles.categoryInfo}>
                     <View
                       style={[
                         styles.categoryIcon,
-                        { backgroundColor: budget.category.color + '20' }
+                        { backgroundColor: (budget?.category?.color || '#666') + '20' }
                       ]}
                     >
                       <Ionicons
-                        name={budget.category.icon as any}
+                        name={(budget?.category?.icon || 'wallet') as any}
                         size={20}
-                        color={budget.category.color}
+                        color={budget?.category?.color || '#666'}
                       />
                     </View>
                     <View style={styles.categoryText}>
                       <Text style={[styles.categoryName, { color: colors.text }]}>
-                        {budget.category.name}
+                        {budget?.category?.name || 'Categoria'}
                       </Text>
-                      <Text style={[styles.budgetStatus, { color: getStatusColor(budget.status) }]}>
-                        {getStatusText(budget.status)}
+                      <Text style={[styles.budgetStatus, { color: getStatusColor(budget?.status || 'ON_TRACK') }]}>
+                        {getStatusText(budget?.status || 'ON_TRACK')}
                       </Text>
                     </View>
                   </View>
@@ -429,11 +430,11 @@ export default function BudgetsScreen() {
 
                 <View style={styles.budgetProgress}>
                   <View style={styles.progressInfo}>
-                    <Text style={[styles.progressText, { color: colors.textSecondary }]}>
-                      {formatCurrency(budget.currentSpent)} de {formatCurrency(budget.monthlyLimit)}
+                    <Text style={[styles.progressText, { color: colors.text }]}>
+                      {formatCurrency(budget?.currentSpent || 0)} de {formatCurrency(budget?.monthlyLimit || 0)}
                     </Text>
-                    <Text style={[styles.progressPercentage, { color: getStatusColor(budget.status) }]}>
-                      {budget.percentage.toFixed(1)}%
+                    <Text style={[styles.progressPercentage, { color: getStatusColor(budget?.status || 'ON_TRACK') }]}>
+                      {(budget?.percentage || 0).toFixed(1)}%
                     </Text>
                   </View>
                   
@@ -442,15 +443,15 @@ export default function BudgetsScreen() {
                       style={[
                         styles.progressFill,
                         {
-                          width: `${Math.min(budget.percentage, 100)}%`,
-                          backgroundColor: getStatusColor(budget.status),
+                          width: `${Math.min(budget?.percentage || 0, 100)}%`,
+                          backgroundColor: getStatusColor(budget?.status || 'ON_TRACK'),
                         }
                       ]}
                     />
                   </View>
                   
                   <Text style={[styles.remainingText, { color: colors.textSecondary }]}>
-                    {budget.remaining >= 0 ? 'Restam' : 'Excedeu'} {formatCurrency(Math.abs(budget.remaining))}
+                    {(budget?.remaining || 0) >= 0 ? 'Restam' : 'Excedeu'} {formatCurrency(Math.abs(budget?.remaining || 0))}
                   </Text>
                 </View>
               </View>
