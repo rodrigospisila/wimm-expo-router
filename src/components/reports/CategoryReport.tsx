@@ -189,7 +189,7 @@ export default function CategoryReport({ dateRange, refreshing }: CategoryReport
                   ]}>
                     {formatCurrency(category.totalAmount)}
                   </Text>
-                  {category.subCategories.length > 0 && (
+                  {(category.subCategories || []).length > 0 && (
                     <Ionicons
                       name={expandedCategories.has(category.id) ? 'chevron-up' : 'chevron-down'}
                       size={20}
@@ -203,10 +203,10 @@ export default function CategoryReport({ dateRange, refreshing }: CategoryReport
               {renderProgressBar(category.percentage, category.color)}
 
               {/* Subcategorias */}
-              {expandedCategories.has(category.id) && category.subCategories.length > 0 && (
+              {expandedCategories.has(category.id) && (category.subCategories || []).length > 0 && (
                 <View style={styles.subCategoriesContainer}>
                   <Text style={styles.subCategoriesTitle}>Subcategorias</Text>
-                  {category.subCategories.map((subCategory) => (
+                  {(category.subCategories || []).map((subCategory) => (
                     <View key={subCategory.id} style={styles.subCategoryItem}>
                       <View style={styles.subCategoryInfo}>
                         <View style={[styles.subCategoryIcon, { backgroundColor: subCategory.color }]}>
