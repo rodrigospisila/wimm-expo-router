@@ -541,6 +541,138 @@ export const creditCardService = {
   },
 };
 
+export const budgetService = {
+  async getBudgets(month?: number, year?: number): Promise<Array<{
+    id: number;
+    monthlyLimit: number;
+    currentSpent: number;
+    percentage: number;
+    remaining: number;
+    status: 'ON_TRACK' | 'WARNING' | 'OVER_BUDGET';
+    month: number;
+    year: number;
+    category: {
+      id: number;
+      name: string;
+      color: string;
+      icon: string;
+      type: string;
+    };
+  }>> {
+    const params: any = {};
+    if (month) params.month = month;
+    if (year) params.year = year;
+    
+    const response = await api.get('/budgets', { params });
+    return response.data;
+  },
+
+  async getBudgetSummary(month?: number, year?: number): Promise<{
+    totalBudget: number;
+    totalSpent: number;
+    totalRemaining: number;
+    budgetCount: number;
+    overBudgetCount: number;
+    warningCount: number;
+    onTrackCount: number;
+    categories: Array<{
+      categoryId: number;
+      categoryName: string;
+      categoryColor: string;
+      categoryIcon: string;
+      budgetId: number;
+      monthlyLimit: number;
+      currentSpent: number;
+      percentage: number;
+      remaining: number;
+      status: string;
+    }>;
+  }> {
+    const params: any = {};
+    if (month) params.month = month;
+    if (year) params.year = year;
+    
+    const response = await api.get('/budgets/summary', { params });
+    return response.data;
+  },
+
+  async createBudget(data: {
+    categoryId: number;
+    subcategoryId?: number;
+    monthlyLimit: number;
+    month: number;
+    year: number;
+  }): Promise<{
+    id: number;
+    monthlyLimit: number;
+    currentSpent: number;
+    percentage: number;
+    remaining: number;
+    status: string;
+    month: number;
+    year: number;
+    category: {
+      id: number;
+      name: string;
+      color: string;
+      icon: string;
+      type: string;
+    };
+  }> {
+    const response = await api.post('/budgets', data);
+    return response.data;
+  },
+
+  async updateBudget(id: number, data: {
+    monthlyLimit?: number;
+  }): Promise<{
+    id: number;
+    monthlyLimit: number;
+    currentSpent: number;
+    percentage: number;
+    remaining: number;
+    status: string;
+    month: number;
+    year: number;
+    category: {
+      id: number;
+      name: string;
+      color: string;
+      icon: string;
+      type: string;
+    };
+  }> {
+    const response = await api.patch(`/budgets/${id}`, data);
+    return response.data;
+  },
+
+  async deleteBudget(id: number): Promise<{ message: string }> {
+    const response = await api.delete(`/budgets/${id}`);
+    return response.data;
+  },
+
+  async getBudget(id: number): Promise<{
+    id: number;
+    monthlyLimit: number;
+    currentSpent: number;
+    percentage: number;
+    remaining: number;
+    status: string;
+    month: number;
+    year: number;
+    category: {
+      id: number;
+      name: string;
+      color: string;
+      icon: string;
+      type: string;
+    };
+  }> {
+    const response = await api.get(`/budgets/${id}`);
+    return response.data;
+  },
+};
+
 export const reportsService = {
   async getDashboard(startDate?: string, endDate?: string): Promise<{
     period: {
